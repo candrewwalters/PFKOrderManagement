@@ -1,317 +1,293 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Kitchen Order Management System</title>
-        <style>
-            * {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-            }
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PFK Order Parser</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-            body {
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                background: linear-gradient(135deg, #1a3a2e 0%, #2d5a47 100%);
-                color: #e8f5e9;
-                min-height: 100vh;
-            }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a3a2e 0%, #2d5a47 100%);
+            color: #e8f5e9;
+            min-height: 100vh;
+        }
 
-            .container {
-                max-width: 1400px;
-                margin: 0 auto;
-                padding: 20px;
-            }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
 
-            h1 {
-                text-align: center;
-                color: #a5d6a7;
-                margin-bottom: 30px;
-                font-size: 2em;
-                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-            }
+        h1 {
+            text-align: center;
+            color: #a5d6a7;
+            margin-bottom: 30px;
+            font-size: 2em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
 
-            .tabs {
-                display: flex;
-                gap: 5px;
-                margin-bottom: 20px;
-                flex-wrap: wrap;
-                border-bottom: 2px solid #4a7c59;
-            }
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            border-bottom: 2px solid #4a7c59;
+        }
 
-            .tab {
-                padding: 12px 20px;
-                background: #2d5a47;
-                border: 1px solid #4a7c59;
-                border-bottom: none;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                color: #c8e6c9;
-                font-weight: 500;
-                border-radius: 8px 8px 0 0;
-            }
+        .tab {
+            padding: 12px 20px;
+            background: #2d5a47;
+            border: 1px solid #4a7c59;
+            border-bottom: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #c8e6c9;
+            font-weight: 500;
+            border-radius: 8px 8px 0 0;
+        }
 
-            .tab:hover {
-                background: #3d6b57;
-                color: #a5d6a7;
-            }
+        .tab:hover {
+            background: #3d6b57;
+            color: #a5d6a7;
+        }
 
-            .tab.active {
-                background: #4a7c59;
-                color: #e8f5e9;
-                border-color: #5d9e6f;
-                box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
-            }
+        .tab.active {
+            background: #4a7c59;
+            color: #e8f5e9;
+            border-color: #5d9e6f;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
+        }
 
-            .tab-content {
-                display: none;
-                background: #234a3a;
-                padding: 30px;
-                border-radius: 0 8px 8px 8px;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-                min-height: 500px;
-            }
+        .tab-content {
+            display: none;
+            background: #234a3a;
+            padding: 30px;
+            border-radius: 0 8px 8px 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            min-height: 500px;
+        }
 
-            .tab-content.active {
-                display: block;
-            }
+        .tab-content.active {
+            display: block;
+        }
 
-            textarea {
-                width: 100%;
-                min-height: 300px;
-                padding: 15px;
-                background: #1a3a2e;
-                color: #c8e6c9;
-                border: 2px solid #4a7c59;
-                border-radius: 8px;
-                font-family: 'Courier New', monospace;
-                font-size: 14px;
-                resize: vertical;
-            }
+        textarea {
+            width: 100%;
+            min-height: 300px;
+            padding: 15px;
+            background: #1a3a2e;
+            color: #c8e6c9;
+            border: 2px solid #4a7c59;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+        }
 
-            textarea:focus {
-                outline: none;
-                border-color: #5d9e6f;
-                box-shadow: 0 0 10px rgba(93, 158, 111, 0.3);
-            }
+        textarea:focus {
+            outline: none;
+            border-color: #5d9e6f;
+            box-shadow: 0 0 10px rgba(93, 158, 111, 0.3);
+        }
 
-            .info-box {
-                margin-top: 15px;
-                padding: 15px;
-                background: #2d5a47;
-                border-left: 4px solid #4a7c59;
-                border-radius: 4px;
-            }
+        .info-box {
+            margin-top: 15px;
+            padding: 15px;
+            background: #2d5a47;
+            border-left: 4px solid #4a7c59;
+            border-radius: 4px;
+        }
 
-            .warning {
-                border-left-color: #d4a574;
-                background: #3d4a2d;
-            }
+        .warning {
+            border-left-color: #d4a574;
+            background: #3d4a2d;
+        }
 
-            .report-table {
-                width: 100%;
-                border-collapse: collapse;
-                margin-top: 20px;
-                background: #1a3a2e;
-                border-radius: 8px;
-                overflow: hidden;
-            }
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: #1a3a2e;
+            border-radius: 8px;
+            overflow: hidden;
+        }
 
-            .report-table th {
-                background: #2d5a47;
-                color: #a5d6a7;
-                padding: 12px;
-                text-align: left;
-                border-bottom: 2px solid #4a7c59;
-                font-weight: 600;
-            }
+        .report-table th {
+            background: #2d5a47;
+            color: #a5d6a7;
+            padding: 12px;
+            text-align: left;
+            border-bottom: 2px solid #4a7c59;
+            font-weight: 600;
+        }
 
-            .report-table td {
-                padding: 10px 12px;
-                border-bottom: 1px solid #2d5a47;
-                color: #c8e6c9;
-            }
+        .report-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #2d5a47;
+            color: #c8e6c9;
+        }
 
-            .report-table tr:hover {
-                background: #234a3a;
-            }
+        .report-table tr:hover {
+            background: #234a3a;
+        }
 
-            .report-table tr.blank-row {
-                height: 20px;
-            }
+        .report-table tr.blank-row {
+            height: 20px;
+        }
 
-            .report-table tr.blank-row td {
-                padding: 0;
-                border: none;
-            }
+        .report-table tr.blank-row td {
+            padding: 0;
+            border: none;
+        }
 
-            .export-btn {
-                margin: 20px 0;
-                padding: 12px 30px;
-                background: #4a7c59;
-                color: #e8f5e9;
-                border: 2px solid #5d9e6f;
-                border-radius: 8px;
-                cursor: pointer;
-                font-size: 16px;
-                font-weight: 600;
-                transition: all 0.3s ease;
-            }
+        .export-btn {
+            margin: 20px 0;
+            padding: 12px 30px;
+            background: #4a7c59;
+            color: #e8f5e9;
+            border: 2px solid #5d9e6f;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
 
-            .export-btn:hover {
-                background: #5d9e6f;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            }
+        .export-btn:hover {
+            background: #5d9e6f;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
 
-            .welcome {
-                line-height: 1.8;
-            }
+        .welcome {
+            line-height: 1.8;
+        }
 
-            .welcome h2 {
-                color: #a5d6a7;
-                margin: 20px 0 10px 0;
-            }
+        .welcome h2 {
+            color: #a5d6a7;
+            margin: 20px 0 10px 0;
+        }
 
-            .welcome ul {
-                margin-left: 30px;
-                margin-top: 10px;
-            }
+        .welcome ul {
+            margin-left: 30px;
+            margin-top: 10px;
+        }
 
-            .welcome li {
-                margin: 8px 0;
-            }
+        .welcome li {
+            margin: 8px 0;
+        }
 
-            .error {
-                color: #f48fb1;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <h1>🍽️ Kitchen Order Management System</h1>
+        .error {
+            color: #f48fb1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍽️ PFK Order Parser</h1>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab(0)">Welcome</div>
+            <div class="tab" onclick="switchTab(1)">Import Data</div>
+            <div class="tab" onclick="switchTab(2)">Master List</div>
+            <div class="tab" onclick="switchTab(3)">Customer Order Tags</div>
+            <div class="tab" onclick="switchTab(4)">Production Totals</div>
+            <div class="tab" onclick="switchTab(5)">Production Packing List</div>
+            <div class="tab" onclick="switchTab(6)">Pickup Day List</div>
+            <div class="tab" onclick="switchTab(7)">Product Categories</div>
+        </div>
 
-            <div class="tabs">
-                <div class="tab active" onclick="switchTab(0)">Welcome</div>
-                <div class="tab" onclick="switchTab(1)">Import Data</div>
-                <div class="tab" onclick="switchTab(2)">Master List</div>
-                <div class="tab" onclick="switchTab(3)">Customer Order Tags</div>
-                <div class="tab" onclick="switchTab(4)">Production Totals</div>
-                <div class="tab" onclick="switchTab(5)">Production Packing List</div>
-                <div class="tab" onclick="switchTab(6)">Pickup Day List</div>
-                <div class="tab" onclick="switchTab(7)">Product Categories</div>
-            </div>
+        <div class="tab-content active" id="tab0">
+            <div class="welcome">
+                <h2>Welcome to the PFK Order Parser</h2>
+                <p>This application helps you process Squarespace order data and generate organized reports for kitchen preparation.</p>
+                
+                <h2>How to Use:</h2>
+                <ul>
+                    <li><strong>Step 1:</strong> Go to the "Product Categories" tab and verify/edit the product-to-category mappings. These are saved automatically.</li>
+                    <li><strong>Step 2:</strong> Go to the "Import Data" tab and paste your Squarespace CSV export into the text area.</li>
+                    <li><strong>Step 3:</strong> The system will automatically parse the data and generate five reports.</li>
+                    <li><strong>Step 4:</strong> Navigate through the report tabs to view each report.</li>
+                    <li><strong>Step 5:</strong> Use the "Export" button on each report to copy tab-delimited data to your clipboard for pasting into spreadsheets.</li>
+                </ul>
 
-            <div class="tab-content active" id="tab0">
-                <div class="welcome">
-                    <h2>Welcome to the Kitchen Order Management System</h2>
-                    <p>
-                        This application helps you process Squarespace order data and generate organized reports for
-                        kitchen preparation.
-                    </p>
+                <h2>Available Reports:</h2>
+                <ul>
+                    <li><strong>Master List:</strong> Complete order details with all fields and categories</li>
+                    <li><strong>Customer Order Tags:</strong> Orders organized by customer with full item details</li>
+                    <li><strong>Production Totals:</strong> Aggregate quantities of each product needed</li>
+                    <li><strong>Production Packing List:</strong> Items organized by pickup time</li>
+                    <li><strong>Pickup Day List:</strong> Summary of orders by pickup time</li>
+                </ul>
 
-                    <h2>How to Use:</h2>
-                    <ul>
-                        <li>
-                            <strong>Step 1:</strong> Go to the "Product Categories" tab and verify/edit the
-                            product-to-category mappings. These are saved automatically.
-                        </li>
-                        <li>
-                            <strong>Step 2:</strong> Go to the "Import Data" tab and paste your Squarespace CSV export
-                            into the text area.
-                        </li>
-                        <li>
-                            <strong>Step 3:</strong> The system will automatically parse the data and generate five
-                            reports.
-                        </li>
-                        <li><strong>Step 4:</strong> Navigate through the report tabs to view each report.</li>
-                        <li>
-                            <strong>Step 5:</strong> Use the "Export" button on each report to copy tab-delimited data
-                            to your clipboard for pasting into spreadsheets.
-                        </li>
-                    </ul>
-
-                    <h2>Available Reports:</h2>
-                    <ul>
-                        <li><strong>Master List:</strong> Complete order details with all fields and categories</li>
-                        <li>
-                            <strong>Customer Order Tags:</strong> Orders organized by customer with full item details
-                        </li>
-                        <li><strong>Production Totals:</strong> Aggregate quantities of each product needed</li>
-                        <li><strong>Production Packing List:</strong> Items organized by pickup time</li>
-                        <li><strong>Pickup Day List:</strong> Summary of orders by pickup time</li>
-                    </ul>
-
-                    <div class="info-box">
-                        <strong>Note:</strong> If any products don't have assigned categories, they'll be flagged after
-                        import. You can add them in the Product Categories tab.
-                    </div>
+                <div class="info-box">
+                    <strong>Note:</strong> If any products don't have assigned categories, they'll be flagged after import. You can add them in the Product Categories tab.
                 </div>
-            </div>
-
-            <div class="tab-content" id="tab1">
-                <h2>Import CSV Data</h2>
-                <textarea
-                    id="csvInput"
-                    placeholder="Paste your Squarespace CSV data here..."
-                    oninput="parseCSV()"
-                ></textarea>
-                <div id="importStatus" class="info-box" style="display: none"></div>
-            </div>
-
-            <div class="tab-content" id="tab2">
-                <h2>Master List</h2>
-                <button class="export-btn" onclick="exportReport('master')">Export to Clipboard</button>
-                <div id="masterReport"></div>
-            </div>
-
-            <div class="tab-content" id="tab3">
-                <h2>Customer Order Tags</h2>
-                <button class="export-btn" onclick="exportReport('customer')">Export to Clipboard</button>
-                <div id="customerReport"></div>
-            </div>
-
-            <div class="tab-content" id="tab4">
-                <h2>Production Totals</h2>
-                <button class="export-btn" onclick="exportReport('production')">Export to Clipboard</button>
-                <div id="productionReport"></div>
-            </div>
-
-            <div class="tab-content" id="tab5">
-                <h2>Production Packing List</h2>
-                <button class="export-btn" onclick="exportReport('packing')">Export to Clipboard</button>
-                <div id="packingReport"></div>
-            </div>
-
-            <div class="tab-content" id="tab6">
-                <h2>Pickup Day List</h2>
-                <button class="export-btn" onclick="exportReport('pickup')">Export to Clipboard</button>
-                <div id="pickupReport"></div>
-            </div>
-
-            <div class="tab-content" id="tab7">
-                <h2>Product Categories</h2>
-                <p style="margin-bottom: 15px">
-                    Edit the product and category mappings below. Format: Product,Category (one per line)
-                </p>
-                <textarea id="categoriesInput" oninput="validateCategories()"></textarea>
-                <div id="categoriesStatus" class="info-box" style="display: none"></div>
             </div>
         </div>
 
-        <script>
-            let currentTab = 0;
-            let parsedData = {
-                master: [],
-                customer: [],
-                production: [],
-                packing: [],
-                pickup: []
-            };
-            let categoryMap = {};
-            let previousCategoriesValue = '';
+        <div class="tab-content" id="tab1">
+            <h2>Import CSV Data</h2>
+            <textarea id="csvInput" placeholder="Paste your Squarespace CSV data here..." oninput="parseCSV()"></textarea>
+            <div id="importStatus" class="info-box" style="display:none;"></div>
+        </div>
 
-            const defaultCategories = `Alder Smoked Almonds,1 PAN
+        <div class="tab-content" id="tab2">
+            <h2>Master List</h2>
+            <button class="export-btn" onclick="exportReport('master')">Export to Clipboard</button>
+            <div id="masterReport"></div>
+        </div>
+
+        <div class="tab-content" id="tab3">
+            <h2>Customer Order Tags</h2>
+            <button class="export-btn" onclick="exportReport('customer')">Export to Clipboard</button>
+            <div id="customerReport"></div>
+        </div>
+
+        <div class="tab-content" id="tab4">
+            <h2>Production Totals</h2>
+            <button class="export-btn" onclick="exportReport('production')">Export to Clipboard</button>
+            <div id="productionReport"></div>
+        </div>
+
+        <div class="tab-content" id="tab5">
+            <h2>Production Packing List</h2>
+            <button class="export-btn" onclick="exportReport('packing')">Export to Clipboard</button>
+            <div id="packingReport"></div>
+        </div>
+
+        <div class="tab-content" id="tab6">
+            <h2>Pickup Day List</h2>
+            <button class="export-btn" onclick="exportReport('pickup')">Export to Clipboard</button>
+            <div id="pickupReport"></div>
+        </div>
+
+        <div class="tab-content" id="tab7">
+            <h2>Product Categories</h2>
+            <p style="margin-bottom: 15px;">Edit the product and category mappings below. Format: Product,Category (one per line)</p>
+            <textarea id="categoriesInput" oninput="validateCategories()"></textarea>
+            <div id="categoriesStatus" class="info-box" style="display:none;"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentTab = 0;
+        let parsedData = {
+            master: [],
+            customer: [],
+            production: [],
+            packing: [],
+            pickup: []
+        };
+        let categoryMap = {};
+        let previousCategoriesValue = '';
+
+        const defaultCategories = `Alder Smoked Almonds,1 PAN
 Aprium Jam,1 PAN
 Assorted Cookie Box,2 BNB
 Bean Spread / Hummus,4 PER
@@ -379,192 +355,202 @@ Tomato Focaccia with Pesto,2 BNB
 White Nectarine Elderberry Jam,1 PAN
 Winter Minestrone,4 PER`;
 
-            function initializeApp() {
-                const saved = localStorage.getItem('productCategories');
+        function initializeApp() {
+            const saved = localStorage.getItem('productCategories');
+            const categoriesInput = document.getElementById('categoriesInput');
+            categoriesInput.value = saved || defaultCategories;
+            previousCategoriesValue = categoriesInput.value;
+            loadCategoryMap();
+        }
+
+        function loadCategoryMap() {
+            categoryMap = {};
+            const input = document.getElementById('categoriesInput').value;
+            const lines = input.split('\n');
+            lines.forEach(line => {
+                const parts = line.split(',');
+                if (parts.length >= 2) {
+                    const product = parts[0].trim();
+                    const category = parts.slice(1).join(',').trim();
+                    categoryMap[product] = category;
+                }
+            });
+        }
+
+        function validateCategories() {
+            const input = document.getElementById('categoriesInput').value;
+            const lines = input.split('\n').filter(l => l.trim());
+            const status = document.getElementById('categoriesStatus');
+            const errors = [];
+
+            lines.forEach((line, i) => {
+                if (!line.includes(',')) {
+                    errors.push(`Line ${i + 1}: Missing comma separator`);
+                }
+            });
+
+            if (errors.length > 0) {
+                status.innerHTML = '<strong class="error">Issues found:</strong><br>' + errors.join('<br>');
+                status.className = 'info-box warning';
+                status.style.display = 'block';
+            } else {
+                status.innerHTML = '<strong>✓ Format looks good!</strong> Changes will be saved automatically.';
+                status.className = 'info-box';
+                status.style.display = 'block';
+            }
+
+            localStorage.setItem('productCategories', input);
+            loadCategoryMap();
+        }
+
+        function switchTab(index) {
+            if (index === 7 || currentTab === 7) {
                 const categoriesInput = document.getElementById('categoriesInput');
-                categoriesInput.value = saved || defaultCategories;
-                previousCategoriesValue = categoriesInput.value;
-                loadCategoryMap();
-            }
-
-            function loadCategoryMap() {
-                categoryMap = {};
-                const input = document.getElementById('categoriesInput').value;
-                const lines = input.split('\n');
-                lines.forEach((line) => {
-                    const parts = line.split(',');
-                    if (parts.length >= 2) {
-                        const product = parts[0].trim();
-                        const category = parts.slice(1).join(',').trim();
-                        categoryMap[product] = category;
-                    }
-                });
-            }
-
-            function validateCategories() {
-                const input = document.getElementById('categoriesInput').value;
-                const lines = input.split('\n').filter((l) => l.trim());
-                const status = document.getElementById('categoriesStatus');
-                const errors = [];
-
-                lines.forEach((line, i) => {
-                    if (!line.includes(',')) {
-                        errors.push(`Line ${i + 1}: Missing comma separator`);
-                    }
-                });
-
-                if (errors.length > 0) {
-                    status.innerHTML = '<strong class="error">Issues found:</strong><br>' + errors.join('<br>');
-                    status.className = 'info-box warning';
-                    status.style.display = 'block';
-                } else {
-                    status.innerHTML = '<strong>✓ Format looks good!</strong> Changes will be saved automatically.';
-                    status.className = 'info-box';
-                    status.style.display = 'block';
-                }
-
-                localStorage.setItem('productCategories', input);
-                loadCategoryMap();
-            }
-
-            function switchTab(index) {
-                if (index === 7 || currentTab === 7) {
-                    const categoriesInput = document.getElementById('categoriesInput');
-                    if (currentTab === 7 && categoriesInput.value !== previousCategoriesValue) {
-                        previousCategoriesValue = categoriesInput.value;
-                        loadCategoryMap();
-                        if (document.getElementById('csvInput').value) {
-                            parseCSV();
-                        }
+                if (currentTab === 7 && categoriesInput.value !== previousCategoriesValue) {
+                    previousCategoriesValue = categoriesInput.value;
+                    loadCategoryMap();
+                    if (document.getElementById('csvInput').value) {
+                        parseCSV();
                     }
                 }
-
-                currentTab = index;
-                document.querySelectorAll('.tab').forEach((tab, i) => {
-                    tab.classList.toggle('active', i === index);
-                });
-                document.querySelectorAll('.tab-content').forEach((content, i) => {
-                    content.classList.toggle('active', i === index);
-                });
             }
 
-            function parseCSV() {
-                const input = document.getElementById('csvInput').value.trim();
-                if (!input) return;
+            currentTab = index;
+            document.querySelectorAll('.tab').forEach((tab, i) => {
+                tab.classList.toggle('active', i === index);
+            });
+            document.querySelectorAll('.tab-content').forEach((content, i) => {
+                content.classList.toggle('active', i === index);
+            });
+        }
 
-                const lines = input.split('\n');
-                const headers = parseCSVLine(lines[0]);
-                const orders = [];
-                let currentOrder = null;
-                let uncategorizedProducts = new Set();
+        function parseCSV() {
+            const input = document.getElementById('csvInput').value.trim();
+            if (!input) return;
 
-                for (let i = 1; i < lines.length; i++) {
-                    const values = parseCSVLine(lines[i]);
-                    if (values.length < headers.length) continue;
+            const lines = input.split('\n');
+            const headers = parseCSVLine(lines[0]);
+            const orders = [];
+            let currentOrderInfo = null;
+            let uncategorizedProducts = new Set();
 
-                    const row = {};
-                    headers.forEach((header, idx) => {
-                        row[header] = values[idx] || '';
-                    });
+            for (let i = 1; i < lines.length; i++) {
+                const values = parseCSVLine(lines[i]);
+                if (values.length < headers.length) continue;
 
-                    if (row['Order ID']) {
-                        currentOrder = {
-                            orderId: row['Order ID'],
-                            email: row['Email'],
-                            name: row['Billing Name'],
-                            pickupTime: row['Checkout Form: Pick up time options'] || '',
-                            specialTimeRequest: row['Checkout Form: Pickup Time Request'] || '',
-                            orderTotal: row['Subtotal'],
-                            paidOnline: row['Financial Status'] === 'PAID' ? 'Yes' : 'No',
-                            collectPayment: row['Financial Status'] === 'PAID' ? 'No' : 'Yes',
-                            paymentMethod: row['Payment Method'] || '',
+                const row = {};
+                headers.forEach((header, idx) => {
+                    row[header] = values[idx] || '';
+                });
+
+                // Update current order info when we see an Order ID (new order)
+                if (row['Order ID']) {
+                    currentOrderInfo = {
+                        orderId: row['Order ID'],
+                        email: row['Email'],
+                        name: row['Billing Name'],
+                        pickupTime: row['Checkout Form: Pick up time options'] || '',
+                        specialTimeRequest: row['Checkout Form: Pickup Time Request'] || '',
+                        orderTotal: row['Subtotal'],
+                        paidOnline: row['Financial Status'] === 'PAID' ? 'Yes' : 'No',
+                        collectPayment: row['Financial Status'] === 'PAID' ? 'No' : 'Yes',
+                        paymentMethod: row['Payment Method'] || ''
+                    };
+                }
+
+                // Add line items using the current order info
+                if (currentOrderInfo && row['Lineitem name']) {
+                    const product = row['Lineitem name'];
+                    const category = categoryMap[product] || 'NONE';
+                    if (category === 'NONE') {
+                        uncategorizedProducts.add(product);
+                    }
+
+                    // Find or create order in orders array
+                    let order = orders.find(o => o.orderId === currentOrderInfo.orderId);
+                    if (!order) {
+                        order = {
+                            ...currentOrderInfo,
                             items: []
                         };
-                        orders.push(currentOrder);
+                        orders.push(order);
                     }
 
-                    if (currentOrder && row['Lineitem name']) {
-                        const product = row['Lineitem name'];
-                        const category = categoryMap[product] || 'NONE';
-                        if (category === 'NONE') {
-                            uncategorizedProducts.add(product);
-                        }
-
-                        currentOrder.items.push({
-                            quantity: row['Lineitem quantity'],
-                            product: product,
-                            category: category,
-                            price: row['Lineitem price'],
-                            description: row['Lineitem variant'] || '',
-                            sku: row['Lineitem sku']
-                        });
-                    }
+                    order.items.push({
+                        quantity: row['Lineitem quantity'],
+                        product: product,
+                        category: category,
+                        price: row['Lineitem price'],
+                        description: row['Lineitem variant'] || '',
+                        sku: row['Lineitem sku']
+                    });
                 }
-
-                generateReports(orders);
-                displayImportStatus(orders, uncategorizedProducts);
             }
 
-            function parseCSVLine(line) {
-                const result = [];
-                let current = '';
-                let inQuotes = false;
+            generateReports(orders);
+            displayImportStatus(orders, uncategorizedProducts);
+        }
 
-                for (let i = 0; i < line.length; i++) {
-                    const char = line[i];
-                    if (char === '"') {
-                        if (inQuotes && line[i + 1] === '"') {
-                            current += '"';
-                            i++;
-                        } else {
-                            inQuotes = !inQuotes;
-                        }
-                    } else if (char === ',' && !inQuotes) {
-                        result.push(current);
-                        current = '';
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                if (char === '"') {
+                    if (inQuotes && line[i + 1] === '"') {
+                        current += '"';
+                        i++;
                     } else {
-                        current += char;
+                        inQuotes = !inQuotes;
                     }
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current);
+                    current = '';
+                } else {
+                    current += char;
                 }
-                result.push(current);
-                return result;
             }
+            result.push(current);
+            return result;
+        }
 
-            function generateReports(orders) {
-                generateMasterList(orders);
-                generateCustomerOrderTags(orders);
-                generateProductionTotals(orders);
-                generateProductionPackingList(orders);
-                generatePickupDayList(orders);
-            }
+        function generateReports(orders) {
+            generateMasterList(orders);
+            generateCustomerOrderTags(orders);
+            generateProductionTotals(orders);
+            generateProductionPackingList(orders);
+            generatePickupDayList(orders);
+        }
 
-            function generateMasterList(orders) {
-                parsedData.master = [];
-                orders.forEach((order) => {
-                    order.items.forEach((item) => {
-                        parsedData.master.push({
-                            name: order.name,
-                            orderId: order.orderId,
-                            pickupTime: order.pickupTime,
-                            specialTimeRequest: order.specialTimeRequest,
-                            orderTotal: order.orderTotal,
-                            paidOnline: order.paidOnline,
-                            collectPayment: order.collectPayment,
-                            quantity: item.quantity,
-                            product: item.product,
-                            category: item.category,
-                            price: item.price,
-                            description: item.description,
-                            paymentMethod: order.paymentMethod
-                        });
+        function generateMasterList(orders) {
+            parsedData.master = [];
+            orders.forEach(order => {
+                order.items.forEach(item => {
+                    parsedData.master.push({
+                        name: order.name,
+                        orderId: order.orderId,
+                        pickupTime: order.pickupTime,
+                        specialTimeRequest: order.specialTimeRequest,
+                        orderTotal: order.orderTotal,
+                        paidOnline: order.paidOnline,
+                        collectPayment: order.collectPayment,
+                        quantity: item.quantity,
+                        product: item.product,
+                        category: item.category,
+                        price: item.price,
+                        description: item.description,
+                        paymentMethod: order.paymentMethod
                     });
                 });
+            });
 
-                displayMasterList();
-            }
+            displayMasterList();
+        }
 
-            function displayMasterList() {
-                const html = `
+        function displayMasterList() {
+            const html = `
                 <table class="report-table">
                     <thead>
                         <tr>
@@ -584,9 +570,7 @@ Winter Minestrone,4 PER`;
                         </tr>
                     </thead>
                     <tbody>
-                        ${parsedData.master
-                            .map(
-                                (row) => `
+                        ${parsedData.master.map(row => `
                             <tr>
                                 <td>${row.name}</td>
                                 <td>${row.orderId}</td>
@@ -602,152 +586,158 @@ Winter Minestrone,4 PER`;
                                 <td>${row.description}</td>
                                 <td>${row.paymentMethod}</td>
                             </tr>
-                        `
-                            )
-                            .join('')}
+                        `).join('')}
                     </tbody>
                 </table>
             `;
-                document.getElementById('masterReport').innerHTML = html;
-            }
+            document.getElementById('masterReport').innerHTML = html;
+        }
 
-            function generateCustomerOrderTags(orders) {
-                parsedData.customer = [];
-                const sortedOrders = [...orders].sort((a, b) => a.name.localeCompare(b.name));
-
-                sortedOrders.forEach((order) => {
-                    order.items.forEach((item, idx) => {
-                        parsedData.customer.push({
-                            name: order.name,
-                            orderId: order.orderId,
-                            pickupTime: order.pickupTime,
-                            orderTotal: idx === 0 ? order.orderTotal : '',
-                            payment: idx === 0 ? (order.paidOnline === 'Yes' ? 'Paid' : order.paymentMethod) : '',
-                            quantity: item.quantity,
-                            description: item.description,
-                            product: item.product,
-                            isLastInOrder: idx === order.items.length - 1
-                        });
+        function generateCustomerOrderTags(orders) {
+            parsedData.customer = [];
+            
+            orders.forEach(order => {
+                order.items.forEach(item => {
+                    parsedData.customer.push({
+                        name: order.name,
+                        orderId: order.orderId,
+                        pickupTime: order.pickupTime,
+                        orderTotal: order.orderTotal,
+                        paymentMethod: order.paymentMethod,
+                        quantity: item.quantity,
+                        description: item.description,
+                        product: item.product,
+                        category: item.category
                     });
                 });
+            });
 
-                displayCustomerOrderTags();
-            }
+            parsedData.customer.sort((a, b) => {
+                if (a.name !== b.name) return a.name.localeCompare(b.name);
+                if (a.category !== b.category) return a.category.localeCompare(b.category);
+                if (a.product !== b.product) return a.product.localeCompare(b.product);
+                return a.description.localeCompare(b.description);
+            });
 
-            function displayCustomerOrderTags() {
-                let html =
-                    '<table class="report-table"><thead><tr><th>Name</th><th>Order ID</th><th>Pickup Time</th><th>Order Total</th><th>Payment</th><th>Quantity</th><th>Description</th><th>Product</th></tr></thead><tbody>';
+            let prevName = '';
+            parsedData.customer.forEach((row, idx) => {
+                row.isLastInOrder = (idx === parsedData.customer.length - 1 || 
+                                     parsedData.customer[idx + 1].name !== row.name);
+                prevName = row.name;
+            });
 
-                parsedData.customer.forEach((row) => {
-                    html += `
+            displayCustomerOrderTags();
+        }
+
+        function displayCustomerOrderTags() {
+            let html = '<table class="report-table"><thead><tr><th>Name</th><th>Pickup Time</th><th>Order ID</th><th>Order Total</th><th>Payment Method</th><th>Quantity</th><th>Description</th><th>Product</th></tr></thead><tbody>';
+            
+            parsedData.customer.forEach(row => {
+                html += `
                     <tr>
                         <td>${row.name}</td>
-                        <td>${row.orderId}</td>
                         <td>${row.pickupTime}</td>
-                        <td>${row.orderTotal ? '$' + row.orderTotal : ''}</td>
-                        <td>${row.payment}</td>
+                        <td>${row.orderId}</td>
+                        <td>$${row.orderTotal}</td>
+                        <td>${row.paymentMethod}</td>
                         <td>${row.quantity}</td>
                         <td>${row.description}</td>
                         <td>${row.product}</td>
                     </tr>
                 `;
-                    if (row.isLastInOrder) {
-                        html += '<tr class="blank-row"><td colspan="8"></td></tr>';
+                if (row.isLastInOrder) {
+                    html += '<tr class="blank-row"><td colspan="8"></td></tr>';
+                }
+            });
+            
+            html += '</tbody></table>';
+            document.getElementById('customerReport').innerHTML = html;
+        }
+
+        function generateProductionTotals(orders) {
+            const productTotals = {};
+
+            orders.forEach(order => {
+                order.items.forEach(item => {
+                    if (!productTotals[item.product]) {
+                        productTotals[item.product] = {
+                            product: item.product,
+                            category: item.category,
+                            description: item.description,
+                            quantity: 0
+                        };
                     }
+                    productTotals[item.product].quantity += parseInt(item.quantity) || 0;
                 });
+            });
 
-                html += '</tbody></table>';
-                document.getElementById('customerReport').innerHTML = html;
-            }
+            parsedData.production = Object.values(productTotals).sort((a, b) => 
+                a.product.localeCompare(b.product)
+            );
 
-            function generateProductionTotals(orders) {
-                const productTotals = {};
+            displayProductionTotals();
+        }
 
-                orders.forEach((order) => {
-                    order.items.forEach((item) => {
-                        if (!productTotals[item.product]) {
-                            productTotals[item.product] = {
-                                product: item.product,
-                                category: item.category,
-                                description: item.description,
-                                quantity: 0
-                            };
-                        }
-                        productTotals[item.product].quantity += parseInt(item.quantity) || 0;
-                    });
-                });
-
-                parsedData.production = Object.values(productTotals).sort((a, b) => a.product.localeCompare(b.product));
-
-                displayProductionTotals();
-            }
-
-            function displayProductionTotals() {
-                const html = `
+        function displayProductionTotals() {
+            const html = `
                 <table class="report-table">
                     <thead>
                         <tr>
-                            <th>Total Quantity</th>
+                            <th>Totals</th>
                             <th>Product</th>
                             <th>Category</th>
                             <th>Description</th>
                         </tr>
                     </thead>
                     <tbody>
-                        ${parsedData.production
-                            .map(
-                                (row) => `
+                        ${parsedData.production.map(row => `
                             <tr>
                                 <td>${row.quantity}</td>
                                 <td>${row.product}</td>
                                 <td>${row.category}</td>
                                 <td>${row.description}</td>
                             </tr>
-                        `
-                            )
-                            .join('')}
+                        `).join('')}
                     </tbody>
                 </table>
             `;
-                document.getElementById('productionReport').innerHTML = html;
-            }
+            document.getElementById('productionReport').innerHTML = html;
+        }
 
-            function generateProductionPackingList(orders) {
-                const packingList = {};
+        function generateProductionPackingList(orders) {
+            const packingList = {};
 
-                orders.forEach((order) => {
-                    const time = order.pickupTime;
-                    if (!packingList[time]) packingList[time] = {};
+            orders.forEach(order => {
+                const time = order.pickupTime;
+                if (!packingList[time]) packingList[time] = {};
 
-                    order.items.forEach((item) => {
-                        const key = item.product;
-                        if (!packingList[time][key]) {
-                            packingList[time][key] = {
-                                pickupTime: time,
-                                product: item.product,
-                                category: item.category,
-                                description: item.description,
-                                quantity: 0
-                            };
-                        }
-                        packingList[time][key].quantity += parseInt(item.quantity) || 0;
-                    });
+                order.items.forEach(item => {
+                    const key = item.product;
+                    if (!packingList[time][key]) {
+                        packingList[time][key] = {
+                            pickupTime: time,
+                            product: item.product,
+                            category: item.category,
+                            description: item.description,
+                            quantity: 0
+                        };
+                    }
+                    packingList[time][key].quantity += parseInt(item.quantity) || 0;
                 });
+            });
 
-                parsedData.packing = [];
-                Object.keys(packingList)
-                    .sort()
-                    .forEach((time) => {
-                        Object.values(packingList[time]).forEach((item) => {
-                            parsedData.packing.push(item);
-                        });
-                    });
+            parsedData.packing = [];
+            Object.keys(packingList).sort().forEach(time => {
+                Object.values(packingList[time]).forEach(item => {
+                    parsedData.packing.push(item);
+                });
+            });
 
-                displayProductionPackingList();
-            }
+            displayProductionPackingList();
+        }
 
-            function displayProductionPackingList() {
-                const html = `
+        function displayProductionPackingList() {
+            const html = `
                 <table class="report-table">
                     <thead>
                         <tr>
@@ -759,9 +749,7 @@ Winter Minestrone,4 PER`;
                         </tr>
                     </thead>
                     <tbody>
-                        ${parsedData.packing
-                            .map(
-                                (row) => `
+                        ${parsedData.packing.map(row => `
                             <tr>
                                 <td>${row.pickupTime}</td>
                                 <td>${row.quantity}</td>
@@ -769,32 +757,28 @@ Winter Minestrone,4 PER`;
                                 <td>${row.category}</td>
                                 <td>${row.description}</td>
                             </tr>
-                        `
-                            )
-                            .join('')}
+                        `).join('')}
                     </tbody>
                 </table>
             `;
-                document.getElementById('packingReport').innerHTML = html;
-            }
+            document.getElementById('packingReport').innerHTML = html;
+        }
 
-            function generatePickupDayList(orders) {
-                parsedData.pickup = orders
-                    .map((order) => ({
-                        name: order.name,
-                        orderId: order.orderId,
-                        pickupTime: order.pickupTime,
-                        orderTotal: order.orderTotal,
-                        paid: order.paidOnline,
-                        paymentMethod: order.paymentMethod
-                    }))
-                    .sort((a, b) => a.pickupTime.localeCompare(b.pickupTime));
+        function generatePickupDayList(orders) {
+            parsedData.pickup = orders.map(order => ({
+                name: order.name,
+                orderId: order.orderId,
+                pickupTime: order.pickupTime,
+                orderTotal: order.orderTotal,
+                paid: order.paidOnline,
+                paymentMethod: order.paymentMethod
+            })).sort((a, b) => a.pickupTime.localeCompare(b.pickupTime));
 
-                displayPickupDayList();
-            }
+            displayPickupDayList();
+        }
 
-            function displayPickupDayList() {
-                const html = `
+        function displayPickupDayList() {
+            const html = `
                 <table class="report-table">
                     <thead>
                         <tr>
@@ -807,9 +791,7 @@ Winter Minestrone,4 PER`;
                         </tr>
                     </thead>
                     <tbody>
-                        ${parsedData.pickup
-                            .map(
-                                (row) => `
+                        ${parsedData.pickup.map(row => `
                             <tr>
                                 <td>${row.name}</td>
                                 <td>${row.orderId}</td>
@@ -818,145 +800,89 @@ Winter Minestrone,4 PER`;
                                 <td>${row.paid}</td>
                                 <td>${row.paymentMethod}</td>
                             </tr>
-                        `
-                            )
-                            .join('')}
+                        `).join('')}
                     </tbody>
                 </table>
             `;
-                document.getElementById('pickupReport').innerHTML = html;
+            document.getElementById('pickupReport').innerHTML = html;
+        }
+
+        function displayImportStatus(orders, uncategorizedProducts) {
+            const status = document.getElementById('importStatus');
+            let totalItems = 0;
+            orders.forEach(order => totalItems += order.items.length);
+
+            let html = `<strong>✓ Successfully imported:</strong> ${orders.length} orders, ${totalItems} items`;
+
+            if (uncategorizedProducts.size > 0) {
+                html += '<br><br><strong class="error">⚠ Products without categories:</strong><br>';
+                html += Array.from(uncategorizedProducts).join(', ');
+                html += '<br><br>Please add these products to the Product Categories tab.';
+                status.className = 'info-box warning';
+            } else {
+                status.className = 'info-box';
             }
 
-            function displayImportStatus(orders, uncategorizedProducts) {
-                const status = document.getElementById('importStatus');
-                let totalItems = 0;
-                orders.forEach((order) => (totalItems += order.items.length));
+            status.innerHTML = html;
+            status.style.display = 'block';
+        }
 
-                let html = `<strong>✓ Successfully imported:</strong> ${orders.length} orders, ${totalItems} items`;
+        function exportReport(reportType) {
+            let data = [];
+            let headers = [];
 
-                if (uncategorizedProducts.size > 0) {
-                    html += '<br><br><strong class="error">⚠ Products without categories:</strong><br>';
-                    html += Array.from(uncategorizedProducts).join(', ');
-                    html += '<br><br>Please add these products to the Product Categories tab.';
-                    status.className = 'info-box warning';
-                } else {
-                    status.className = 'info-box';
-                }
-
-                status.innerHTML = html;
-                status.style.display = 'block';
-            }
-
-            function exportReport(reportType) {
-                let data = [];
-                let headers = [];
-
-                switch (reportType) {
-                    case 'master':
-                        headers = [
-                            'Name',
-                            'Order ID',
-                            'Pick Up Time',
-                            'Special Time Request',
-                            'Order Total',
-                            'Paid Online',
-                            'Collect Payment',
-                            'Quantity',
-                            'Product',
-                            'Category',
-                            'Price',
-                            'Description',
-                            'Payment Method'
-                        ];
-                        data = parsedData.master.map((row) => [
-                            row.name,
-                            row.orderId,
-                            row.pickupTime,
-                            row.specialTimeRequest,
-                            row.orderTotal,
-                            row.paidOnline,
-                            row.collectPayment,
-                            row.quantity,
-                            row.product,
-                            row.category,
-                            row.price,
-                            row.description,
-                            row.paymentMethod
+            switch(reportType) {
+                case 'master':
+                    headers = ['Name', 'Order ID', 'Pick Up Time', 'Special Time Request', 'Order Total', 'Paid Online', 'Collect Payment', 'Quantity', 'Product', 'Category', 'Price', 'Description', 'Payment Method'];
+                    data = parsedData.master.map(row => [
+                        row.name, row.orderId, row.pickupTime, row.specialTimeRequest,
+                        row.orderTotal, row.paidOnline, row.collectPayment, row.quantity,
+                        row.product, row.category, row.price, row.description, row.paymentMethod
+                    ]);
+                    break;
+                case 'customer':
+                    headers = ['Name', 'Pickup Time', 'Order ID', 'Order Total', 'Payment Method', 'Quantity', 'Description', 'Product'];
+                    parsedData.customer.forEach(row => {
+                        data.push([
+                            row.name, row.pickupTime, row.orderId, row.orderTotal,
+                            row.paymentMethod, row.quantity, row.description, row.product
                         ]);
-                        break;
-                    case 'customer':
-                        headers = [
-                            'Name',
-                            'Order ID',
-                            'Pickup Time',
-                            'Order Total',
-                            'Payment',
-                            'Quantity',
-                            'Description',
-                            'Product'
-                        ];
-                        parsedData.customer.forEach((row) => {
-                            data.push([
-                                row.name,
-                                row.orderId,
-                                row.pickupTime,
-                                row.orderTotal,
-                                row.payment,
-                                row.quantity,
-                                row.description,
-                                row.product
-                            ]);
-                            if (row.isLastInOrder) {
-                                data.push(['', '', '', '', '', '', '', '']);
-                            }
-                        });
-                        break;
-                    case 'production':
-                        headers = ['Total Quantity', 'Product', 'Category', 'Description'];
-                        data = parsedData.production.map((row) => [
-                            row.quantity,
-                            row.product,
-                            row.category,
-                            row.description
-                        ]);
-                        break;
-                    case 'packing':
-                        headers = ['Pickup Time', 'Total Quantity', 'Product', 'Category', 'Description'];
-                        data = parsedData.packing.map((row) => [
-                            row.pickupTime,
-                            row.quantity,
-                            row.product,
-                            row.category,
-                            row.description
-                        ]);
-                        break;
-                    case 'pickup':
-                        headers = ['Customer Name', 'Order ID', 'Pickup Time', 'Order Total', 'Paid', 'Payment Method'];
-                        data = parsedData.pickup.map((row) => [
-                            row.name,
-                            row.orderId,
-                            row.pickupTime,
-                            row.orderTotal,
-                            row.paid,
-                            row.paymentMethod
-                        ]);
-                        break;
-                }
-
-                const tsvContent = [headers, ...data].map((row) => row.join('\t')).join('\n');
-
-                navigator.clipboard
-                    .writeText(tsvContent)
-                    .then(() => {
-                        alert('Report copied to clipboard! You can now paste it into a spreadsheet.');
-                    })
-                    .catch((err) => {
-                        alert('Failed to copy to clipboard. Please try again.');
-                        console.error('Clipboard error:', err);
+                        if (row.isLastInOrder) {
+                            data.push(['', '', '', '', '', '', '', '']);
+                        }
                     });
+                    break;
+                case 'production':
+                    headers = ['Totals', 'Product', 'Category', 'Description'];
+                    data = parsedData.production.map(row => [
+                        row.quantity, row.product, row.category, row.description
+                    ]);
+                    break;
+                case 'packing':
+                    headers = ['Pickup Time', 'Total Quantity', 'Product', 'Category', 'Description'];
+                    data = parsedData.packing.map(row => [
+                        row.pickupTime, row.quantity, row.product, row.category, row.description
+                    ]);
+                    break;
+                case 'pickup':
+                    headers = ['Customer Name', 'Order ID', 'Pickup Time', 'Order Total', 'Paid', 'Payment Method'];
+                    data = parsedData.pickup.map(row => [
+                        row.name, row.orderId, row.pickupTime, row.orderTotal, row.paid, row.paymentMethod
+                    ]);
+                    break;
             }
 
-            initializeApp();
-        </script>
-    </body>
+            const tsvContent = [headers, ...data].map(row => row.join('\t')).join('\n');
+            
+            navigator.clipboard.writeText(tsvContent).then(() => {
+                alert('Report copied to clipboard! You can now paste it into a spreadsheet.');
+            }).catch(err => {
+                alert('Failed to copy to clipboard. Please try again.');
+                console.error('Clipboard error:', err);
+            });
+        }
+
+        initializeApp();
+    </script>
+</body>
 </html>
