@@ -478,10 +478,10 @@ Winter Minestrone,4 PER`;
             }
 
             function togglePaymentMethod(orderId) {
-                if (paymentOverrides[orderId] === 'PayPal') {
+                if (paymentOverrides[orderId] === 'Paid') {
                     paymentOverrides[orderId] = null;
                 } else {
-                    paymentOverrides[orderId] = 'PayPal';
+                    paymentOverrides[orderId] = 'Paid';
                 }
                 generateReports(parsedData.rawOrders);
             }
