@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>PFK Order Parser 2</title>
+        <title>PFK Order Parser 3</title>
         <style>
             * {
                 margin: 0;
@@ -200,6 +200,31 @@
                 color: #a5d6a7;
             }
 
+            /* Master List click-to-edit cells */
+            .report-table td[onclick] {
+                cursor: pointer;
+            }
+
+            .report-table td[onclick]:hover {
+                background: #2d5a47;
+                text-decoration: underline dotted;
+            }
+
+            .cell-edit-input {
+                width: 100%;
+                padding: 4px 6px;
+                background: #1a3a2e;
+                color: #e8f5e9;
+                border: 2px solid #5d9e6f;
+                border-radius: 4px;
+                font: inherit;
+            }
+
+            .cell-edit-input:focus {
+                outline: none;
+                box-shadow: 0 0 6px rgba(93, 158, 111, 0.5);
+            }
+
             /* Feature 1: CSV file load button */
             .import-controls {
                 display: flex;
@@ -329,23 +354,22 @@
     </head>
     <body>
         <div class="container">
-            <h1>🍽️ PFK Order Parser 2</h1>
+            <h1>🍽️ PFK Order Parser 3</h1>
 
             <div class="tabs">
                 <div class="tab active" onclick="switchTab(0)">Welcome</div>
                 <div class="tab" onclick="switchTab(1)">Import Data</div>
-                <div class="tab" onclick="switchTab(2)">Other Payments</div>
-                <div class="tab" onclick="switchTab(3)">Master List</div>
-                <div class="tab" onclick="switchTab(4)">Customer Order Tags</div>
-                <div class="tab" onclick="switchTab(5)">Production Totals</div>
-                <div class="tab" onclick="switchTab(6)">Production Packing List</div>
-                <div class="tab" onclick="switchTab(7)">Pickup Day List</div>
-                <div class="tab" onclick="switchTab(8)">Product Categories</div>
+                <div class="tab" onclick="switchTab(2)">Master List</div>
+                <div class="tab" onclick="switchTab(3)">Customer Order Tags</div>
+                <div class="tab" onclick="switchTab(4)">Production Totals</div>
+                <div class="tab" onclick="switchTab(5)">Production Packing List</div>
+                <div class="tab" onclick="switchTab(6)">Pickup Day List</div>
+                <div class="tab" onclick="switchTab(7)">Product Categories</div>
             </div>
 
             <div class="tab-content active" id="tab0">
                 <div class="welcome">
-                    <h2>Welcome to the PFK Order Parser 2</h2>
+                    <h2>Welcome to the PFK Order Parser 3</h2>
                     <p>
                         This application helps you process Squarespace order data and generate organized reports for
                         kitchen preparation.
@@ -377,8 +401,10 @@
 
                     <h2>Available Reports:</h2>
                     <ul>
-                        <li><strong>Other Payments:</strong> View and modify payment methods for orders</li>
-                        <li><strong>Master List:</strong> Complete order details with all fields and categories</li>
+                        <li>
+                            <strong>Master List:</strong> Complete order details with all fields and categories. Click
+                            Name, Pick Up Time, or Payment Method to edit.
+                        </li>
                         <li>
                             <strong>Customer Order Tags:</strong> Orders organized by customer with full item details
                         </li>
@@ -412,45 +438,42 @@
                 <div id="importStatus" class="info-box" style="display: none"></div>
             </div>
 
+            <!-- Tab 2: Master List — Feature 2: Add Order Row section appended inside displayMasterList() -->
             <div class="tab-content" id="tab2">
-                <h2>Other Payments</h2>
-                <p style="margin-bottom: 15px">Click on "None" to toggle payment method to "PayPal" and back.</p>
-                <button class="export-btn" onclick="exportReport('payments')">Export to Clipboard</button>
-                <div id="paymentsReport"></div>
-            </div>
-
-            <!-- Tab 3: Master List — Feature 2: Add Order Row section appended inside displayMasterList() -->
-            <div class="tab-content" id="tab3">
                 <h2>Master List</h2>
+                <p style="margin-bottom: 15px">
+                    Click on a Name, Pick Up Time, or Payment Method cell to edit it. Editing Name or Pick Up Time
+                    updates every line for that Order ID.
+                </p>
                 <button class="export-btn" onclick="exportReport('master')">Export to Clipboard</button>
                 <div id="masterReport"></div>
             </div>
 
-            <div class="tab-content" id="tab4">
+            <div class="tab-content" id="tab3">
                 <h2>Customer Order Tags</h2>
                 <button class="export-btn" onclick="exportReport('customer')">Export to Clipboard</button>
                 <div id="customerReport"></div>
             </div>
 
-            <div class="tab-content" id="tab5">
+            <div class="tab-content" id="tab4">
                 <h2>Production Totals</h2>
                 <button class="export-btn" onclick="exportReport('production')">Export to Clipboard</button>
                 <div id="productionReport"></div>
             </div>
 
-            <div class="tab-content" id="tab6">
+            <div class="tab-content" id="tab5">
                 <h2>Production Packing List</h2>
                 <button class="export-btn" onclick="exportReport('packing')">Export to Clipboard</button>
                 <div id="packingReport"></div>
             </div>
 
-            <div class="tab-content" id="tab7">
+            <div class="tab-content" id="tab6">
                 <h2>Pickup Day List</h2>
                 <button class="export-btn" onclick="exportReport('pickup')">Export to Clipboard</button>
                 <div id="pickupReport"></div>
             </div>
 
-            <div class="tab-content" id="tab8">
+            <div class="tab-content" id="tab7">
                 <h2>Product Categories</h2>
                 <p style="margin-bottom: 15px">
                     Edit the product and category mappings below. Format: Product,Category (one per line)
@@ -467,12 +490,13 @@
                 customer: [],
                 production: [],
                 packing: [],
-                pickup: [],
-                payments: []
+                pickup: []
             };
             let categoryMap = {};
             let previousCategoriesValue = '';
             let paymentOverrides = {};
+            let nameOverrides = {};
+            let pickupTimeOverrides = {};
 
             // Manually-added rows (persist across re-renders)
             let manualRows = [];
@@ -850,9 +874,9 @@ Winter Minestrone,4 PER`;
             }
 
             function switchTab(index) {
-                if (index === 8 || currentTab === 8) {
+                if (index === 7 || currentTab === 7) {
                     const categoriesInput = document.getElementById('categoriesInput');
-                    if (currentTab === 8 && categoriesInput.value !== previousCategoriesValue) {
+                    if (currentTab === 7 && categoriesInput.value !== previousCategoriesValue) {
                         previousCategoriesValue = categoriesInput.value;
                         loadCategoryMap();
                         if (document.getElementById('csvInput').value) {
@@ -879,11 +903,71 @@ Winter Minestrone,4 PER`;
                 generateReports(parsedData.rawOrders);
             }
 
+            function updateName(orderId, newValue) {
+                nameOverrides[orderId] = newValue;
+                generateReports(parsedData.rawOrders);
+            }
+
+            function updatePickupTime(orderId, newValue) {
+                pickupTimeOverrides[orderId] = newValue;
+                generateReports(parsedData.rawOrders);
+            }
+
+            // ── Master List click-to-edit (Name / Pick Up Time) ────────────────
+
+            function startEditCell(cell, orderId, field) {
+                // Avoid re-entering edit mode if already editing this cell
+                if (cell.querySelector('input')) return;
+
+                const currentValue = cell.textContent.trim();
+                cell.innerHTML = `<input type="text" class="cell-edit-input" value="${currentValue.replace(/"/g, '&quot;')}" />`;
+                const input = cell.querySelector('input');
+                input.focus();
+                input.select();
+
+                const save = () => {
+                    const newValue = input.value;
+                    if (field === 'name') {
+                        updateName(orderId, newValue);
+                    } else if (field === 'pickupTime') {
+                        updatePickupTime(orderId, newValue);
+                    }
+                };
+
+                input.addEventListener('blur', save);
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        input.blur();
+                    } else if (e.key === 'Escape') {
+                        e.preventDefault();
+                        input.removeEventListener('blur', save);
+                        displayMasterList();
+                    }
+                });
+                // Don't let the cell's own onclick re-trigger while editing
+                event.stopPropagation();
+            }
+
             function getPaymentMethod(order) {
                 if (paymentOverrides[order.orderId] !== undefined && paymentOverrides[order.orderId] !== null) {
                     return paymentOverrides[order.orderId];
                 }
                 return order.paymentMethod || 'None';
+            }
+
+            function getName(order) {
+                if (nameOverrides[order.orderId] !== undefined && nameOverrides[order.orderId] !== null) {
+                    return nameOverrides[order.orderId];
+                }
+                return order.name;
+            }
+
+            function getPickupTime(order) {
+                if (pickupTimeOverrides[order.orderId] !== undefined && pickupTimeOverrides[order.orderId] !== null) {
+                    return pickupTimeOverrides[order.orderId];
+                }
+                return order.pickupTime;
             }
 
             function parseCSV() {
@@ -979,60 +1063,20 @@ Winter Minestrone,4 PER`;
             }
 
             function generateReports(orders) {
-                generateOtherPayments(orders);
-                generateMasterList(orders);
-                generateCustomerOrderTags(orders);
-                generateProductionTotals(orders);
-                generateProductionPackingList(orders);
-                generatePickupDayList(orders);
-            }
-
-            function generateOtherPayments(orders) {
-                parsedData.payments = orders.map((order) => ({
-                    orderNumber: order.items[0]?.sku || order.orderId,
-                    customerName: order.name,
-                    orderId: order.orderId,
-                    orderTotal: order.orderTotal,
+                // Apply Name / Pick Up Time / Payment Method overrides once, up front,
+                // so every report (Master List + the 4 derived reports) sees the same values.
+                const resolvedOrders = orders.map((order) => ({
+                    ...order,
+                    name: getName(order),
+                    pickupTime: getPickupTime(order),
                     paymentMethod: getPaymentMethod(order)
                 }));
 
-                displayOtherPayments();
-            }
-
-            function displayOtherPayments() {
-                let html = `
-                <table class="report-table">
-                    <thead>
-                        <tr>
-                            <th>Order Number</th>
-                            <th>Customer Name</th>
-                            <th>Order ID</th>
-                            <th>Order Total</th>
-                            <th>Payment Method</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${parsedData.payments
-                            .map(
-                                (row) => `
-                            <tr>
-                                <td>${row.orderNumber}</td>
-                                <td>${row.customerName}</td>
-                                <td>${row.orderId}</td>
-                                <td>$${row.orderTotal}</td>
-                                <td>
-                                    <button class="payment-toggle" onclick="togglePaymentMethod('${row.orderId}')">
-                                        ${row.paymentMethod}
-                                    </button>
-                                </td>
-                            </tr>
-                        `
-                            )
-                            .join('')}
-                    </tbody>
-                </table>
-            `;
-                document.getElementById('paymentsReport').innerHTML = html;
+                generateMasterList(resolvedOrders);
+                generateCustomerOrderTags(resolvedOrders);
+                generateProductionTotals(resolvedOrders);
+                generateProductionPackingList(resolvedOrders);
+                generatePickupDayList(resolvedOrders);
             }
 
             function generateMasterList(orders) {
@@ -1052,7 +1096,7 @@ Winter Minestrone,4 PER`;
                             category: item.category,
                             price: item.price,
                             description: item.description,
-                            paymentMethod: getPaymentMethod(order)
+                            paymentMethod: order.paymentMethod
                         });
                     });
                 });
@@ -1066,9 +1110,9 @@ Winter Minestrone,4 PER`;
                     .map(
                         (row) => `
                     <tr>
-                        <td>${row.name}</td>
+                        <td onclick="startEditCell(this, '${row.orderId}', 'name')">${row.name}</td>
                         <td>${row.orderId}</td>
-                        <td>${row.pickupTime}</td>
+                        <td onclick="startEditCell(this, '${row.orderId}', 'pickupTime')">${row.pickupTime}</td>
                         <td>${row.specialTimeRequest}</td>
                         <td>$${row.orderTotal}</td>
                         <td>${row.paidOnline}</td>
@@ -1078,7 +1122,11 @@ Winter Minestrone,4 PER`;
                         <td>${row.category}</td>
                         <td>$${row.price}</td>
                         <td>${row.description}</td>
-                        <td>${row.paymentMethod}</td>
+                        <td>
+                            <button class="payment-toggle" onclick="togglePaymentMethod('${row.orderId}')">
+                                ${row.paymentMethod}
+                            </button>
+                        </td>
                     </tr>
                 `
                     )
@@ -1404,16 +1452,6 @@ Winter Minestrone,4 PER`;
                 let headers = [];
 
                 switch (reportType) {
-                    case 'payments':
-                        headers = ['Order Number', 'Customer Name', 'Order ID', 'Order Total', 'Payment Method'];
-                        data = parsedData.payments.map((row) => [
-                            row.orderNumber,
-                            row.customerName,
-                            row.orderId,
-                            row.orderTotal,
-                            row.paymentMethod
-                        ]);
-                        break;
                     case 'master':
                         headers = [
                             'Name',
