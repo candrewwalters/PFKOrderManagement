@@ -768,9 +768,18 @@ Winter Minestrone,4 PER`;
             }
 
             function regenerateAllReportsWithManualRows() {
-                // Rebuild parsedData.master by re-running from rawOrders + manualRows
+                // Rebuild parsedData.master by re-running from rawOrders + manualRows.
+                // Must resolve Name / Pick Up Time / Payment Method overrides the same way
+                // generateReports() does, or edits made before adding a manual row get
+                // silently reverted to their original imported values.
                 const orders = parsedData.rawOrders || [];
-                generateMasterList(orders); // re-generates parsedData.master (imported rows + manualRows)
+                const resolvedOrders = orders.map((order) => ({
+                    ...order,
+                    name: getName(order),
+                    pickupTime: getPickupTime(order),
+                    paymentMethod: getPaymentMethod(order)
+                }));
+                generateMasterList(resolvedOrders); // re-generates parsedData.master (imported rows + manualRows)
                 displayMasterList();
 
                 // Rebuild other reports using the combined master list as a synthetic order set
