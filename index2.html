@@ -1,0 +1,1526 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>PFK Order Parser 2</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #1a3a2e 0%, #2d5a47 100%);
+                color: #e8f5e9;
+                min-height: 100vh;
+            }
+
+            .container {
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+
+            h1 {
+                text-align: center;
+                color: #a5d6a7;
+                margin-bottom: 30px;
+                font-size: 2em;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            }
+
+            .tabs {
+                display: flex;
+                gap: 5px;
+                margin-bottom: 20px;
+                flex-wrap: wrap;
+                border-bottom: 2px solid #4a7c59;
+            }
+
+            .tab {
+                padding: 12px 20px;
+                background: #2d5a47;
+                border: 1px solid #4a7c59;
+                border-bottom: none;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                color: #c8e6c9;
+                font-weight: 500;
+                border-radius: 8px 8px 0 0;
+            }
+
+            .tab:hover {
+                background: #3d6b57;
+                color: #a5d6a7;
+            }
+
+            .tab.active {
+                background: #4a7c59;
+                color: #e8f5e9;
+                border-color: #5d9e6f;
+                box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+            }
+
+            .tab-content {
+                display: none;
+                background: #234a3a;
+                padding: 30px;
+                border-radius: 0 8px 8px 8px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+                min-height: 500px;
+            }
+
+            .tab-content.active {
+                display: block;
+            }
+
+            textarea {
+                width: 100%;
+                min-height: 300px;
+                padding: 15px;
+                background: #1a3a2e;
+                color: #c8e6c9;
+                border: 2px solid #4a7c59;
+                border-radius: 8px;
+                font-family: 'Courier New', monospace;
+                font-size: 14px;
+                resize: vertical;
+            }
+
+            textarea:focus {
+                outline: none;
+                border-color: #5d9e6f;
+                box-shadow: 0 0 10px rgba(93, 158, 111, 0.3);
+            }
+
+            .info-box {
+                margin-top: 15px;
+                padding: 15px;
+                background: #2d5a47;
+                border-left: 4px solid #4a7c59;
+                border-radius: 4px;
+            }
+
+            .warning {
+                border-left-color: #d4a574;
+                background: #3d4a2d;
+            }
+
+            .report-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+                background: #1a3a2e;
+                border-radius: 8px;
+                overflow: hidden;
+            }
+
+            .report-table th {
+                background: #2d5a47;
+                color: #a5d6a7;
+                padding: 12px;
+                text-align: left;
+                border-bottom: 2px solid #4a7c59;
+                font-weight: 600;
+            }
+
+            .report-table td {
+                padding: 10px 12px;
+                border-bottom: 1px solid #2d5a47;
+                color: #c8e6c9;
+            }
+
+            .report-table tr:hover {
+                background: #234a3a;
+            }
+
+            .report-table tr.blank-row {
+                height: 20px;
+            }
+
+            .report-table tr.blank-row td {
+                padding: 0;
+                border: none;
+            }
+
+            .export-btn {
+                margin: 20px 0;
+                padding: 12px 30px;
+                background: #4a7c59;
+                color: #e8f5e9;
+                border: 2px solid #5d9e6f;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 16px;
+                font-weight: 600;
+                transition: all 0.3s ease;
+            }
+
+            .export-btn:hover {
+                background: #5d9e6f;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            }
+
+            .welcome {
+                line-height: 1.8;
+            }
+
+            .welcome h2 {
+                color: #a5d6a7;
+                margin: 20px 0 10px 0;
+            }
+
+            .welcome ul {
+                margin-left: 30px;
+                margin-top: 10px;
+            }
+
+            .welcome li {
+                margin: 8px 0;
+            }
+
+            .error {
+                color: #f48fb1;
+            }
+
+            .payment-toggle {
+                color: #81c784;
+                text-decoration: underline;
+                cursor: pointer;
+                background: none;
+                border: none;
+                padding: 0;
+                font: inherit;
+            }
+
+            .payment-toggle:hover {
+                color: #a5d6a7;
+            }
+
+            /* Feature 1: CSV file load button */
+            .import-controls {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                margin-bottom: 12px;
+                flex-wrap: wrap;
+            }
+
+            .load-file-btn {
+                padding: 10px 22px;
+                background: #3d6b57;
+                color: #e8f5e9;
+                border: 2px solid #5d9e6f;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 15px;
+                font-weight: 600;
+                transition: all 0.3s ease;
+            }
+
+            .load-file-btn:hover {
+                background: #4a7c59;
+                box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+            }
+
+            #csvFileInput {
+                display: none;
+            }
+
+            /* Feature 2: Add Order row */
+            .add-order-section {
+                margin-top: 28px;
+                padding: 20px;
+                background: #1a3a2e;
+                border: 2px solid #4a7c59;
+                border-radius: 8px;
+            }
+
+            .add-order-section h3 {
+                color: #a5d6a7;
+                margin-bottom: 14px;
+                font-size: 1.1em;
+            }
+
+            .add-order-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 10px;
+                margin-bottom: 14px;
+            }
+
+            .add-order-field {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .add-order-field label {
+                font-size: 11px;
+                color: #a5d6a7;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.4px;
+            }
+
+            .add-order-field textarea.entry-cell {
+                min-height: unset;
+                height: 38px;
+                padding: 6px 8px;
+                font-size: 13px;
+                resize: none;
+                border-radius: 5px;
+            }
+
+            .add-order-buttons {
+                display: flex;
+                gap: 12px;
+                flex-wrap: wrap;
+            }
+
+            .add-row-btn {
+                padding: 10px 24px;
+                background: #4a7c59;
+                color: #e8f5e9;
+                border: 2px solid #5d9e6f;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 15px;
+                font-weight: 600;
+                transition: all 0.3s ease;
+            }
+
+            .add-row-btn:hover {
+                background: #5d9e6f;
+                box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+            }
+
+            .copy-header-btn {
+                padding: 10px 24px;
+                background: #2d5a47;
+                color: #c8e6c9;
+                border: 2px solid #4a7c59;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 15px;
+                font-weight: 600;
+                transition: all 0.3s ease;
+            }
+
+            .copy-header-btn:hover {
+                background: #3d6b57;
+                box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+            }
+
+            .add-order-error {
+                margin-top: 10px;
+                padding: 10px 14px;
+                background: #3d2a2a;
+                border-left: 4px solid #f48fb1;
+                border-radius: 4px;
+                color: #f48fb1;
+                font-size: 13px;
+                display: none;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>🍽️ PFK Order Parser 2</h1>
+
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab(0)">Welcome</div>
+                <div class="tab" onclick="switchTab(1)">Import Data</div>
+                <div class="tab" onclick="switchTab(2)">Other Payments</div>
+                <div class="tab" onclick="switchTab(3)">Master List</div>
+                <div class="tab" onclick="switchTab(4)">Customer Order Tags</div>
+                <div class="tab" onclick="switchTab(5)">Production Totals</div>
+                <div class="tab" onclick="switchTab(6)">Production Packing List</div>
+                <div class="tab" onclick="switchTab(7)">Pickup Day List</div>
+                <div class="tab" onclick="switchTab(8)">Product Categories</div>
+            </div>
+
+            <div class="tab-content active" id="tab0">
+                <div class="welcome">
+                    <h2>Welcome to the PFK Order Parser 2</h2>
+                    <p>
+                        This application helps you process Squarespace order data and generate organized reports for
+                        kitchen preparation.
+                    </p>
+
+                    <h2>How to Use:</h2>
+                    <ul>
+                        <li>
+                            <strong>Step 1:</strong> Go to the "Product Categories" tab and verify/edit the
+                            product-to-category mappings. These are saved automatically.
+                        </li>
+                        <li>
+                            <strong>Step 2:</strong> Go to the "Import Data" tab and paste your Squarespace CSV export
+                            into the text area, or use the "Load CSV File" button to open a file from your computer.
+                        </li>
+                        <li>
+                            <strong>Step 3:</strong> The system will automatically parse the data and generate reports.
+                        </li>
+                        <li><strong>Step 4:</strong> Navigate through the report tabs to view each report.</li>
+                        <li>
+                            <strong>Step 5:</strong> Use the "Export" button on each report to copy tab-delimited data
+                            to your clipboard for pasting into spreadsheets.
+                        </li>
+                        <li>
+                            <strong>Step 6 (optional):</strong> On the Master List tab, use the "Add Order Row" section
+                            at the bottom to manually add additional order lines.
+                        </li>
+                    </ul>
+
+                    <h2>Available Reports:</h2>
+                    <ul>
+                        <li><strong>Other Payments:</strong> View and modify payment methods for orders</li>
+                        <li><strong>Master List:</strong> Complete order details with all fields and categories</li>
+                        <li>
+                            <strong>Customer Order Tags:</strong> Orders organized by customer with full item details
+                        </li>
+                        <li><strong>Production Totals:</strong> Aggregate quantities of each product needed</li>
+                        <li><strong>Production Packing List:</strong> Items organized by pickup time</li>
+                        <li><strong>Pickup Day List:</strong> Summary of orders by pickup time</li>
+                    </ul>
+
+                    <div class="info-box">
+                        <strong>Note:</strong> If any products don't have assigned categories, they'll be flagged after
+                        import. You can add them in the Product Categories tab.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 1: Import Data — Feature 1: added Load CSV File button -->
+            <div class="tab-content" id="tab1">
+                <h2>Import CSV Data</h2>
+                <div class="import-controls">
+                    <button class="load-file-btn" onclick="document.getElementById('csvFileInput').click()">
+                        📂 Load CSV File
+                    </button>
+                    <span style="color: #a5d6a7; font-size: 14px">— or paste directly into the text area below —</span>
+                </div>
+                <input type="file" id="csvFileInput" accept=".csv,text/csv" onchange="loadCSVFile(event)" />
+                <textarea
+                    id="csvInput"
+                    placeholder="Paste your Squarespace CSV data here, or use the Load CSV File button above..."
+                    oninput="parseCSV()"
+                ></textarea>
+                <div id="importStatus" class="info-box" style="display: none"></div>
+            </div>
+
+            <div class="tab-content" id="tab2">
+                <h2>Other Payments</h2>
+                <p style="margin-bottom: 15px">Click on "None" to toggle payment method to "PayPal" and back.</p>
+                <button class="export-btn" onclick="exportReport('payments')">Export to Clipboard</button>
+                <div id="paymentsReport"></div>
+            </div>
+
+            <!-- Tab 3: Master List — Feature 2: Add Order Row section appended inside displayMasterList() -->
+            <div class="tab-content" id="tab3">
+                <h2>Master List</h2>
+                <button class="export-btn" onclick="exportReport('master')">Export to Clipboard</button>
+                <div id="masterReport"></div>
+            </div>
+
+            <div class="tab-content" id="tab4">
+                <h2>Customer Order Tags</h2>
+                <button class="export-btn" onclick="exportReport('customer')">Export to Clipboard</button>
+                <div id="customerReport"></div>
+            </div>
+
+            <div class="tab-content" id="tab5">
+                <h2>Production Totals</h2>
+                <button class="export-btn" onclick="exportReport('production')">Export to Clipboard</button>
+                <div id="productionReport"></div>
+            </div>
+
+            <div class="tab-content" id="tab6">
+                <h2>Production Packing List</h2>
+                <button class="export-btn" onclick="exportReport('packing')">Export to Clipboard</button>
+                <div id="packingReport"></div>
+            </div>
+
+            <div class="tab-content" id="tab7">
+                <h2>Pickup Day List</h2>
+                <button class="export-btn" onclick="exportReport('pickup')">Export to Clipboard</button>
+                <div id="pickupReport"></div>
+            </div>
+
+            <div class="tab-content" id="tab8">
+                <h2>Product Categories</h2>
+                <p style="margin-bottom: 15px">
+                    Edit the product and category mappings below. Format: Product,Category (one per line)
+                </p>
+                <textarea id="categoriesInput" oninput="validateCategories()"></textarea>
+                <div id="categoriesStatus" class="info-box" style="display: none"></div>
+            </div>
+        </div>
+
+        <script>
+            let currentTab = 0;
+            let parsedData = {
+                master: [],
+                customer: [],
+                production: [],
+                packing: [],
+                pickup: [],
+                payments: []
+            };
+            let categoryMap = {};
+            let previousCategoriesValue = '';
+            let paymentOverrides = {};
+
+            // Manually-added rows (persist across re-renders)
+            let manualRows = [];
+
+            const defaultCategories = `Alder Smoked Almonds,1 PAN
+Aprium Jam,1 PAN
+Assorted Cookie Box,2 BNB
+Bean Spread / Hummus,4 PER
+Blenheim Apricot Jam,1 PAN
+Blistered Tomato Galette,2 BNB
+Buche de Noel,2 BNB
+Chimichurri,4 PER
+Chocolate Chip Cookie Dough,4 PER
+Chocolate Walnut Pie,2 BNB
+Comice Pear, Mulberry & Elderberry Tart,2 BNB
+Cornmeal Biscotti,1 PAN
+Eggs,3 EGG
+Elderberry Cordial,1 PAN
+Elderberry Plum Jam,1 PAN
+Elderberry Syrup,1 PAN
+Fig and Mulberry Galette with Almond Cream,2 BNB
+Fig Chutney,1 PAN
+Fresh Eggs,3 EGG
+Fresh Greens and Herbs,4 PER
+Ginger Cardamom Plum Jam - 8oz Jar,1 PAN
+Gougeres,2 BNB
+Holiday Cookie Box,2 BNB
+Holiday Cranberry Jam,1 PAN
+Honey,1 PAN
+Honey / Honeycomb,1 PAN
+Hoshigaki,1 PAN
+House Smoked Almonds,1 PAN
+Marinara Sauce,1 PAN
+Mountain Rye,2 BNB
+Nectarine Jam - 8 oz Jar,1 PAN
+Organic Country Sourdough - Freshly Milled!,2 BNB
+Organic Country Sourdough Bread,2 BNB
+Organic Whole Wheat Einkorn Sourdough,2 BNB
+Passionfruit White Chocolate Mousse Tart,2 BNB
+Peach & Passionfruit Jam,1 PAN
+Peach, Cinnamon and Brandy Jam,1 PAN
+Pear Cornmeal Ginger Scones,2 BNB
+Persimmon Bread,2 BNB
+Persimmon Chutney,1 PAN
+Persimmon Pudding with Brandy Glaze,2 BNB
+PFK Granola with house dried fruits,1 PAN
+Preserves,1 PAN
+Preserves 4 oz/Seville Orange Marmalade,1 PAN
+Preserves-4 oz/Pear Cranberry Mostarda,1 PAN
+Provencal Tomato Sauce,1 PAN
+Pub Sauce,1 PAN
+Roasted Carrot & Red Pepper Hummus,4 PER
+Roasted Strawberry Pinot Noir Jam,1 PAN
+Rum Glazed Apple-Walnut Cake,2 BNB
+Salsa Verde w/White Bean Hummus,4 PER
+Satsuma Plum Jam with Ginger and Cardamom,1 PAN
+Seasonal Fruit Basket,4 PER
+Seedy crackers,1 PAN
+Sourdough Rosemary Focaccia,2 BNB
+Spring Vegetable Salad,4 PER
+Stollen,2 BNB
+Strawberry Apple Rose Jam - 8oz Jar,1 PAN
+Strawberry Balsamic Jam,1 PAN
+Strawberry Rose Jam,1 PAN
+Summer Chopped Salad,4 PER
+Summer Farm Basket,4 PER
+Summer Fruit Galette,2 BNB
+Tangelo Marmalade,1 PAN
+Tomato Focaccia with Pesto,2 BNB
+White Nectarine Elderberry Jam,1 PAN
+Winter Minestrone,4 PER`;
+
+            // ── Feature 1: Load CSV from file ──────────────────────────────────
+            function loadCSVFile(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('csvInput').value = e.target.result;
+                    // Reset the file input so the same file can be re-loaded if needed
+                    event.target.value = '';
+                    parseCSV();
+                };
+                reader.onerror = function () {
+                    alert('Error reading file. Please try again.');
+                };
+                reader.readAsText(file);
+            }
+
+            // ── Feature 2: Add Order Row helpers ──────────────────────────────
+
+            // The 13 Master List columns in order:
+            // 0 name, 1 orderId, 2 pickupTime, 3 specialTimeRequest,
+            // 4 orderTotal, 5 paidOnline, 6 collectPayment,
+            // 7 quantity, 8 product, 9 category, 10 price, 11 description, 12 paymentMethod
+
+            const ENTRY_FIELDS = [
+                { id: 'ent_name', label: 'Name', numeric: false, dollar: false, required: true },
+                { id: 'ent_orderId', label: 'Order ID', numeric: false, dollar: false, required: true },
+                { id: 'ent_pickupTime', label: 'Pick Up Time', numeric: false, dollar: false, required: true },
+                {
+                    id: 'ent_specialTimeRequest',
+                    label: 'Special Time Request',
+                    numeric: false,
+                    dollar: false,
+                    required: false
+                },
+                { id: 'ent_orderTotal', label: 'Order Total', numeric: true, dollar: true, required: true },
+                { id: 'ent_paidOnline', label: 'Paid Online', numeric: false, dollar: false, required: true },
+                { id: 'ent_collectPayment', label: 'Collect Payment', numeric: false, dollar: false, required: true },
+                { id: 'ent_quantity', label: 'Quantity', numeric: true, dollar: false, required: true },
+                { id: 'ent_product', label: 'Product', numeric: false, dollar: false, required: true },
+                { id: 'ent_category', label: 'Category', numeric: false, dollar: false, required: true },
+                { id: 'ent_price', label: 'Price', numeric: true, dollar: true, required: true },
+                { id: 'ent_description', label: 'Description', numeric: false, dollar: false, required: false },
+                { id: 'ent_paymentMethod', label: 'Payment Method', numeric: false, dollar: false, required: true }
+            ];
+
+            // Indices of the first-7 "header" fields (same for every line of an order)
+            const HEADER_FIELD_IDS = [
+                'ent_name',
+                'ent_orderId',
+                'ent_pickupTime',
+                'ent_specialTimeRequest',
+                'ent_orderTotal',
+                'ent_paidOnline',
+                'ent_collectPayment'
+            ];
+
+            function renderAddOrderSection() {
+                const fieldsHtml = ENTRY_FIELDS.map(
+                    (f) => `
+                    <div class="add-order-field">
+                        <label for="${f.id}">${f.label}${f.required ? '' : ' <span style="font-weight:400;color:#7aab8a">(opt)</span>'}</label>
+                        <textarea class="entry-cell" id="${f.id}" rows="1"></textarea>
+                    </div>
+                `
+                ).join('');
+
+                return `
+                    <div class="add-order-section" id="addOrderSection">
+                        <h3>➕ Add Order Row</h3>
+                        <div class="add-order-grid">
+                            ${fieldsHtml}
+                        </div>
+                        <div class="add-order-buttons">
+                            <button class="add-row-btn" onclick="addManualRow()">Add to Master List</button>
+                            <button class="copy-header-btn" onclick="copyHeaderFields()">Copy Header Fields from Last Row</button>
+                        </div>
+                        <div class="add-order-error" id="addOrderError"></div>
+                    </div>
+                `;
+            }
+
+            function copyHeaderFields() {
+                // Copy the first 7 column values from the last row in parsedData.master
+                const allRows = [...parsedData.master, ...manualRows];
+                if (allRows.length === 0) {
+                    showEntryError('No rows in the Master List to copy from.');
+                    return;
+                }
+                const last = allRows[allRows.length - 1];
+                const values = [
+                    last.name,
+                    last.orderId,
+                    last.pickupTime,
+                    last.specialTimeRequest,
+                    last.orderTotal,
+                    last.paidOnline,
+                    last.collectPayment
+                ];
+                HEADER_FIELD_IDS.forEach((id, i) => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = values[i] || '';
+                });
+                clearEntryError();
+            }
+
+            function normalizeDollar(val) {
+                // Strip leading $ if present, return bare numeric string
+                return val.replace(/^\$/, '').trim();
+            }
+
+            function addManualRow() {
+                clearEntryError();
+                const errors = [];
+                const values = {};
+
+                ENTRY_FIELDS.forEach((f) => {
+                    const el = document.getElementById(f.id);
+                    let val = el ? el.value.trim() : '';
+
+                    if (f.dollar) val = normalizeDollar(val);
+
+                    if (f.required && val === '') {
+                        errors.push(`"${f.label}" is required.`);
+                        return;
+                    }
+
+                    if (f.numeric && val !== '') {
+                        const num = parseFloat(val);
+                        if (isNaN(num)) {
+                            errors.push(`"${f.label}" must be a number (got "${val}").`);
+                            return;
+                        }
+                    }
+
+                    values[f.id] = val;
+                });
+
+                if (errors.length > 0) {
+                    showEntryError(errors.join('<br>'));
+                    return;
+                }
+
+                const newRow = {
+                    name: values['ent_name'],
+                    orderId: values['ent_orderId'],
+                    pickupTime: values['ent_pickupTime'],
+                    specialTimeRequest: values['ent_specialTimeRequest'],
+                    orderTotal: values['ent_orderTotal'],
+                    paidOnline: values['ent_paidOnline'],
+                    collectPayment: values['ent_collectPayment'],
+                    quantity: values['ent_quantity'],
+                    product: values['ent_product'],
+                    category: values['ent_category'],
+                    price: values['ent_price'],
+                    description: values['ent_description'],
+                    paymentMethod: values['ent_paymentMethod'],
+                    _manual: true
+                };
+
+                manualRows.push(newRow);
+
+                // Clear item-level fields (cols 7–12), keep header fields for convenience
+                [
+                    'ent_quantity',
+                    'ent_product',
+                    'ent_category',
+                    'ent_price',
+                    'ent_description',
+                    'ent_paymentMethod'
+                ].forEach((id) => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = '';
+                });
+
+                // Re-render all reports so the new row flows through
+                regenerateAllReportsWithManualRows();
+            }
+
+            function regenerateAllReportsWithManualRows() {
+                // Rebuild parsedData.master by re-running from rawOrders + manualRows
+                const orders = parsedData.rawOrders || [];
+                generateMasterList(orders); // re-generates parsedData.master (imported rows)
+                // Now append manual rows and re-display
+                parsedData.master = [...parsedData.master, ...manualRows];
+                displayMasterList();
+
+                // Rebuild other reports using the combined master list as a synthetic order set
+                rebuildDerivedReportsFromMaster();
+            }
+
+            function rebuildDerivedReportsFromMaster() {
+                // Customer Order Tags, Production Totals, Production Packing List, Pickup Day List
+                // are all derived from orders. We reconstruct synthetic order objects from
+                // parsedData.master (which now includes manual rows).
+
+                // Group master rows back into order objects keyed by orderId
+                const orderMap = {};
+                parsedData.master.forEach((row) => {
+                    if (!orderMap[row.orderId]) {
+                        orderMap[row.orderId] = {
+                            orderId: row.orderId,
+                            name: row.name,
+                            pickupTime: row.pickupTime,
+                            specialTimeRequest: row.specialTimeRequest,
+                            orderTotal: row.orderTotal,
+                            paidOnline: row.paidOnline,
+                            collectPayment: row.collectPayment,
+                            paymentMethod: row.paymentMethod,
+                            items: []
+                        };
+                    }
+                    orderMap[row.orderId].items.push({
+                        quantity: row.quantity,
+                        product: row.product,
+                        category: row.category,
+                        price: row.price,
+                        description: row.description
+                    });
+                });
+
+                const syntheticOrders = Object.values(orderMap);
+
+                // Customer tags
+                generateCustomerOrderTagsFromOrders(syntheticOrders);
+                // Production totals
+                generateProductionTotalsFromOrders(syntheticOrders);
+                // Packing list
+                generateProductionPackingListFromOrders(syntheticOrders);
+                // Pickup day list
+                generatePickupDayListFromOrders(syntheticOrders);
+            }
+
+            function showEntryError(msg) {
+                const el = document.getElementById('addOrderError');
+                if (el) {
+                    el.innerHTML = msg;
+                    el.style.display = 'block';
+                }
+            }
+
+            function clearEntryError() {
+                const el = document.getElementById('addOrderError');
+                if (el) {
+                    el.innerHTML = '';
+                    el.style.display = 'none';
+                }
+            }
+
+            // ── Core app logic (unchanged) ─────────────────────────────────────
+
+            function initializeApp() {
+                const saved = localStorage.getItem('productCategories');
+                const categoriesInput = document.getElementById('categoriesInput');
+                categoriesInput.value = saved || defaultCategories;
+                previousCategoriesValue = categoriesInput.value;
+                loadCategoryMap();
+            }
+
+            function normalizeForLookup(str) {
+                return str ? str.replace(/\s+/g, '').toLowerCase() : '';
+            }
+
+            function loadCategoryMap() {
+                categoryMap = {};
+                const input = document.getElementById('categoriesInput').value;
+                const lines = input.split('\n');
+                lines.forEach((line) => {
+                    const parts = line.split(',');
+                    if (parts.length >= 2) {
+                        const product = parts[0].trim();
+                        const category = parts.slice(1).join(',').trim();
+                        const normalizedKey = normalizeForLookup(product);
+                        categoryMap[normalizedKey] = category;
+                    }
+                });
+            }
+
+            function validateCategories() {
+                const input = document.getElementById('categoriesInput').value;
+                const lines = input.split('\n').filter((l) => l.trim());
+                const status = document.getElementById('categoriesStatus');
+                const errors = [];
+
+                lines.forEach((line, i) => {
+                    if (!line.includes(',')) {
+                        errors.push(`Line ${i + 1}: Missing comma separator`);
+                    }
+                });
+
+                if (errors.length > 0) {
+                    status.innerHTML = '<strong class="error">Issues found:</strong><br>' + errors.join('<br>');
+                    status.className = 'info-box warning';
+                    status.style.display = 'block';
+                } else {
+                    status.innerHTML = '<strong>✓ Format looks good!</strong> Changes will be saved automatically.';
+                    status.className = 'info-box';
+                    status.style.display = 'block';
+                }
+
+                localStorage.setItem('productCategories', input);
+                loadCategoryMap();
+            }
+
+            function switchTab(index) {
+                if (index === 8 || currentTab === 8) {
+                    const categoriesInput = document.getElementById('categoriesInput');
+                    if (currentTab === 8 && categoriesInput.value !== previousCategoriesValue) {
+                        previousCategoriesValue = categoriesInput.value;
+                        loadCategoryMap();
+                        if (document.getElementById('csvInput').value) {
+                            parseCSV();
+                        }
+                    }
+                }
+
+                currentTab = index;
+                document.querySelectorAll('.tab').forEach((tab, i) => {
+                    tab.classList.toggle('active', i === index);
+                });
+                document.querySelectorAll('.tab-content').forEach((content, i) => {
+                    content.classList.toggle('active', i === index);
+                });
+            }
+
+            function togglePaymentMethod(orderId) {
+                if (paymentOverrides[orderId] === 'PAID') {
+                    paymentOverrides[orderId] = null;
+                } else {
+                    paymentOverrides[orderId] = 'PAID';
+                }
+                generateReports(parsedData.rawOrders);
+            }
+
+            function getPaymentMethod(order) {
+                if (paymentOverrides[order.orderId] !== undefined && paymentOverrides[order.orderId] !== null) {
+                    return paymentOverrides[order.orderId];
+                }
+                return order.paymentMethod || 'None';
+            }
+
+            function parseCSV() {
+                const input = document.getElementById('csvInput').value.trim();
+                if (!input) return;
+
+                const lines = input.split('\n');
+                const headers = parseCSVLine(lines[0]);
+                const orders = [];
+                let currentOrderInfo = null;
+                let uncategorizedProducts = new Set();
+
+                for (let i = 1; i < lines.length; i++) {
+                    const values = parseCSVLine(lines[i]);
+                    if (values.length < headers.length) continue;
+
+                    const row = {};
+                    headers.forEach((header, idx) => {
+                        row[header] = values[idx] || '';
+                    });
+
+                    if (row['Order ID']) {
+                        currentOrderInfo = {
+                            orderId: row['Order ID'],
+                            email: row['Email'],
+                            name: row['Billing Name'],
+                            pickupTime: row['Checkout Form: Pick up time options'] || '',
+                            specialTimeRequest: row['Checkout Form: Pickup Time Request'] || '',
+                            orderTotal: row['Subtotal'],
+                            paidOnline: row['Financial Status'] === 'PAID' ? 'Yes' : 'No',
+                            collectPayment: row['Financial Status'] === 'PAID' ? 'No' : 'Yes',
+                            paymentMethod: row['Payment Method'] || ''
+                        };
+                    }
+
+                    if (currentOrderInfo && row['Lineitem name']) {
+                        const product = row['Lineitem name'];
+                        const normalizedProduct = normalizeForLookup(product);
+                        const category = categoryMap[normalizedProduct] || 'NONE';
+                        if (category === 'NONE') {
+                            uncategorizedProducts.add(product);
+                        }
+
+                        let order = orders.find((o) => o.orderId === currentOrderInfo.orderId);
+                        if (!order) {
+                            order = {
+                                ...currentOrderInfo,
+                                items: []
+                            };
+                            orders.push(order);
+                        }
+
+                        order.items.push({
+                            quantity: row['Lineitem quantity'],
+                            product: product,
+                            category: category,
+                            price: row['Lineitem price'],
+                            description: row['Lineitem variant'] || '',
+                            sku: row['Lineitem sku']
+                        });
+                    }
+                }
+
+                parsedData.rawOrders = orders;
+                manualRows = []; // Reset manual rows on fresh import
+                generateReports(orders);
+                displayImportStatus(orders, uncategorizedProducts);
+            }
+
+            function parseCSVLine(line) {
+                const result = [];
+                let current = '';
+                let inQuotes = false;
+
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i];
+                    if (char === '"') {
+                        if (inQuotes && line[i + 1] === '"') {
+                            current += '"';
+                            i++;
+                        } else {
+                            inQuotes = !inQuotes;
+                        }
+                    } else if (char === ',' && !inQuotes) {
+                        result.push(current);
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+                result.push(current);
+                return result;
+            }
+
+            function generateReports(orders) {
+                generateOtherPayments(orders);
+                generateMasterList(orders);
+                generateCustomerOrderTags(orders);
+                generateProductionTotals(orders);
+                generateProductionPackingList(orders);
+                generatePickupDayList(orders);
+            }
+
+            function generateOtherPayments(orders) {
+                parsedData.payments = orders.map((order) => ({
+                    orderNumber: order.items[0]?.sku || order.orderId,
+                    customerName: order.name,
+                    orderId: order.orderId,
+                    orderTotal: order.orderTotal,
+                    paymentMethod: getPaymentMethod(order)
+                }));
+
+                displayOtherPayments();
+            }
+
+            function displayOtherPayments() {
+                let html = `
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>Order Number</th>
+                            <th>Customer Name</th>
+                            <th>Order ID</th>
+                            <th>Order Total</th>
+                            <th>Payment Method</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${parsedData.payments
+                            .map(
+                                (row) => `
+                            <tr>
+                                <td>${row.orderNumber}</td>
+                                <td>${row.customerName}</td>
+                                <td>${row.orderId}</td>
+                                <td>$${row.orderTotal}</td>
+                                <td>
+                                    <button class="payment-toggle" onclick="togglePaymentMethod('${row.orderId}')">
+                                        ${row.paymentMethod}
+                                    </button>
+                                </td>
+                            </tr>
+                        `
+                            )
+                            .join('')}
+                    </tbody>
+                </table>
+            `;
+                document.getElementById('paymentsReport').innerHTML = html;
+            }
+
+            function generateMasterList(orders) {
+                parsedData.master = [];
+                orders.forEach((order) => {
+                    order.items.forEach((item) => {
+                        parsedData.master.push({
+                            name: order.name,
+                            orderId: order.orderId,
+                            pickupTime: order.pickupTime,
+                            specialTimeRequest: order.specialTimeRequest,
+                            orderTotal: order.orderTotal,
+                            paidOnline: order.paidOnline,
+                            collectPayment: order.collectPayment,
+                            quantity: item.quantity,
+                            product: item.product,
+                            category: item.category,
+                            price: item.price,
+                            description: item.description,
+                            paymentMethod: getPaymentMethod(order)
+                        });
+                    });
+                });
+                // Append any persisted manual rows when called from generateReports()
+                parsedData.master = [...parsedData.master, ...manualRows];
+                displayMasterList();
+            }
+
+            function displayMasterList() {
+                const tableRows = parsedData.master
+                    .map(
+                        (row) => `
+                    <tr>
+                        <td>${row.name}</td>
+                        <td>${row.orderId}</td>
+                        <td>${row.pickupTime}</td>
+                        <td>${row.specialTimeRequest}</td>
+                        <td>$${row.orderTotal}</td>
+                        <td>${row.paidOnline}</td>
+                        <td>${row.collectPayment}</td>
+                        <td>${row.quantity}</td>
+                        <td>${row.product}</td>
+                        <td>${row.category}</td>
+                        <td>$${row.price}</td>
+                        <td>${row.description}</td>
+                        <td>${row.paymentMethod}</td>
+                    </tr>
+                `
+                    )
+                    .join('');
+
+                const html = `
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Order ID</th>
+                            <th>Pick Up Time</th>
+                            <th>Special Time Request</th>
+                            <th>Order Total</th>
+                            <th>Paid Online</th>
+                            <th>Collect Payment</th>
+                            <th>Quantity</th>
+                            <th>Product</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Description</th>
+                            <th>Payment Method</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tableRows}
+                    </tbody>
+                </table>
+                ${renderAddOrderSection()}
+            `;
+                document.getElementById('masterReport').innerHTML = html;
+            }
+
+            // ── Customer Order Tags ───────────────────────────────────────────
+
+            function generateCustomerOrderTags(orders) {
+                generateCustomerOrderTagsFromOrders(orders);
+            }
+
+            function generateCustomerOrderTagsFromOrders(orders) {
+                parsedData.customer = [];
+
+                orders.forEach((order) => {
+                    order.items.forEach((item) => {
+                        parsedData.customer.push({
+                            name: order.name,
+                            orderId: order.orderId,
+                            pickupTime: order.pickupTime,
+                            orderTotal: order.orderTotal,
+                            paymentMethod: order.paymentMethod || getPaymentMethodById(order.orderId),
+                            quantity: item.quantity,
+                            description: item.description,
+                            product: item.product,
+                            category: item.category
+                        });
+                    });
+                });
+
+                parsedData.customer.sort((a, b) => {
+                    if (a.name !== b.name) return a.name.localeCompare(b.name);
+                    if (a.category !== b.category) return a.category.localeCompare(b.category);
+                    if (a.product !== b.product) return a.product.localeCompare(b.product);
+                    return a.description.localeCompare(b.description);
+                });
+
+                parsedData.customer.forEach((row, idx) => {
+                    row.isLastInOrder =
+                        idx === parsedData.customer.length - 1 || parsedData.customer[idx + 1].name !== row.name;
+                });
+
+                displayCustomerOrderTags();
+            }
+
+            function getPaymentMethodById(orderId) {
+                if (paymentOverrides[orderId] !== undefined && paymentOverrides[orderId] !== null) {
+                    return paymentOverrides[orderId];
+                }
+                return 'None';
+            }
+
+            function displayCustomerOrderTags() {
+                let html =
+                    '<table class="report-table"><thead><tr><th>Name</th><th>Pickup Time</th><th>Order ID</th><th>Order Total</th><th>Payment Method</th><th>Quantity</th><th>Description</th><th>Product</th><th>Category</th></tr></thead><tbody>';
+
+                parsedData.customer.forEach((row) => {
+                    html += `
+                    <tr>
+                        <td>${row.name}</td>
+                        <td>${row.pickupTime}</td>
+                        <td>${row.orderId}</td>
+                        <td>$${row.orderTotal}</td>
+                        <td>${row.paymentMethod}</td>
+                        <td>${row.quantity}</td>
+                        <td>${row.description}</td>
+                        <td>${row.product}</td>
+                        <td>${row.category}</td>
+                    </tr>
+                `;
+                    if (row.isLastInOrder) {
+                        html += '<tr class="blank-row"><td colspan="9"></td></tr>';
+                    }
+                });
+
+                html += '</tbody></table>';
+                document.getElementById('customerReport').innerHTML = html;
+            }
+
+            // ── Production Totals ─────────────────────────────────────────────
+
+            function generateProductionTotals(orders) {
+                generateProductionTotalsFromOrders(orders);
+            }
+
+            function generateProductionTotalsFromOrders(orders) {
+                const productTotals = {};
+
+                orders.forEach((order) => {
+                    order.items.forEach((item) => {
+                        const key = item.product + '|' + item.description;
+                        if (!productTotals[key]) {
+                            productTotals[key] = {
+                                product: item.product,
+                                category: item.category,
+                                description: item.description,
+                                quantity: 0
+                            };
+                        }
+                        productTotals[key].quantity += parseInt(item.quantity) || 0;
+                    });
+                });
+
+                parsedData.production = Object.values(productTotals).sort((a, b) => a.product.localeCompare(b.product));
+
+                displayProductionTotals();
+            }
+
+            function displayProductionTotals() {
+                const html = `
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>Totals</th>
+                            <th>Product</th>
+                            <th>Category</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${parsedData.production
+                            .map(
+                                (row) => `
+                            <tr>
+                                <td>${row.quantity}</td>
+                                <td>${row.product}</td>
+                                <td>${row.category}</td>
+                                <td>${row.description}</td>
+                            </tr>
+                        `
+                            )
+                            .join('')}
+                    </tbody>
+                </table>
+            `;
+                document.getElementById('productionReport').innerHTML = html;
+            }
+
+            // ── Production Packing List ───────────────────────────────────────
+
+            function generateProductionPackingList(orders) {
+                generateProductionPackingListFromOrders(orders);
+            }
+
+            function generateProductionPackingListFromOrders(orders) {
+                const packingList = {};
+
+                orders.forEach((order) => {
+                    const time = order.pickupTime;
+                    if (!packingList[time]) packingList[time] = {};
+
+                    order.items.forEach((item) => {
+                        const key = item.product + '|' + item.description;
+                        if (!packingList[time][key]) {
+                            packingList[time][key] = {
+                                pickupTime: time,
+                                product: item.product,
+                                category: item.category,
+                                description: item.description,
+                                quantity: 0
+                            };
+                        }
+                        packingList[time][key].quantity += parseInt(item.quantity) || 0;
+                    });
+                });
+
+                parsedData.packing = [];
+                Object.keys(packingList)
+                    .sort()
+                    .forEach((time) => {
+                        Object.values(packingList[time]).forEach((item) => {
+                            parsedData.packing.push(item);
+                        });
+                    });
+
+                displayProductionPackingList();
+            }
+
+            function displayProductionPackingList() {
+                const html = `
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>Pickup Time</th>
+                            <th>Total Quantity</th>
+                            <th>Product</th>
+                            <th>Category</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${parsedData.packing
+                            .map(
+                                (row) => `
+                            <tr>
+                                <td>${row.pickupTime}</td>
+                                <td>${row.quantity}</td>
+                                <td>${row.product}</td>
+                                <td>${row.category}</td>
+                                <td>${row.description}</td>
+                            </tr>
+                        `
+                            )
+                            .join('')}
+                    </tbody>
+                </table>
+            `;
+                document.getElementById('packingReport').innerHTML = html;
+            }
+
+            // ── Pickup Day List ───────────────────────────────────────────────
+
+            function generatePickupDayList(orders) {
+                generatePickupDayListFromOrders(orders);
+            }
+
+            function generatePickupDayListFromOrders(orders) {
+                // Dedupe to one row per orderId for pickup day list
+                const seen = new Set();
+                parsedData.pickup = orders
+                    .filter((order) => {
+                        if (seen.has(order.orderId)) return false;
+                        seen.add(order.orderId);
+                        return true;
+                    })
+                    .map((order) => ({
+                        name: order.name,
+                        orderId: order.orderId,
+                        pickupTime: order.pickupTime,
+                        orderTotal: order.orderTotal,
+                        paid: order.paidOnline,
+                        paymentMethod: order.paymentMethod || getPaymentMethodById(order.orderId)
+                    }))
+                    .sort((a, b) => a.pickupTime.localeCompare(b.pickupTime));
+
+                displayPickupDayList();
+            }
+
+            function displayPickupDayList() {
+                const html = `
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>Customer Name</th>
+                            <th>Order ID</th>
+                            <th>Pickup Time</th>
+                            <th>Order Total</th>
+                            <th>Paid</th>
+                            <th>Payment Method</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${parsedData.pickup
+                            .map(
+                                (row) => `
+                            <tr>
+                                <td>${row.name}</td>
+                                <td>${row.orderId}</td>
+                                <td>${row.pickupTime}</td>
+                                <td>${row.orderTotal}</td>
+                                <td>${row.paid}</td>
+                                <td>${row.paymentMethod}</td>
+                            </tr>
+                        `
+                            )
+                            .join('')}
+                    </tbody>
+                </table>
+            `;
+                document.getElementById('pickupReport').innerHTML = html;
+            }
+
+            function displayImportStatus(orders, uncategorizedProducts) {
+                const status = document.getElementById('importStatus');
+                let totalItems = 0;
+                orders.forEach((order) => (totalItems += order.items.length));
+
+                let html = `<strong>✓ Successfully imported:</strong> ${orders.length} orders, ${totalItems} items`;
+
+                if (uncategorizedProducts.size > 0) {
+                    html += '<br><br><strong class="error">⚠ Products without categories:</strong><br>';
+                    html += Array.from(uncategorizedProducts).join(', ');
+                    html += '<br><br>Please add these products to the Product Categories tab.';
+                    status.className = 'info-box warning';
+                } else {
+                    status.className = 'info-box';
+                }
+
+                status.innerHTML = html;
+                status.style.display = 'block';
+            }
+
+            function exportReport(reportType) {
+                let data = [];
+                let headers = [];
+
+                switch (reportType) {
+                    case 'payments':
+                        headers = ['Order Number', 'Customer Name', 'Order ID', 'Order Total', 'Payment Method'];
+                        data = parsedData.payments.map((row) => [
+                            row.orderNumber,
+                            row.customerName,
+                            row.orderId,
+                            row.orderTotal,
+                            row.paymentMethod
+                        ]);
+                        break;
+                    case 'master':
+                        headers = [
+                            'Name',
+                            'Order ID',
+                            'Pick Up Time',
+                            'Special Time Request',
+                            'Order Total',
+                            'Paid Online',
+                            'Collect Payment',
+                            'Quantity',
+                            'Product',
+                            'Category',
+                            'Price',
+                            'Description',
+                            'Payment Method'
+                        ];
+                        data = parsedData.master.map((row) => [
+                            row.name,
+                            row.orderId,
+                            row.pickupTime,
+                            row.specialTimeRequest,
+                            row.orderTotal,
+                            row.paidOnline,
+                            row.collectPayment,
+                            row.quantity,
+                            row.product,
+                            row.category,
+                            row.price,
+                            row.description,
+                            row.paymentMethod
+                        ]);
+                        break;
+                    case 'customer':
+                        headers = [
+                            'Name',
+                            'Pickup Time',
+                            'Order ID',
+                            'Order Total',
+                            'Payment Method',
+                            'Quantity',
+                            'Description',
+                            'Product',
+                            'Category'
+                        ];
+                        parsedData.customer.forEach((row) => {
+                            data.push([
+                                row.name,
+                                row.pickupTime,
+                                row.orderId,
+                                row.orderTotal,
+                                row.paymentMethod,
+                                row.quantity,
+                                row.description,
+                                row.product,
+                                row.category
+                            ]);
+                            if (row.isLastInOrder) {
+                                data.push(['', '', '', '', '', '', '', '', '']);
+                            }
+                        });
+                        break;
+                    case 'production':
+                        headers = ['Totals', 'Product', 'Category', 'Description'];
+                        data = parsedData.production.map((row) => [
+                            row.quantity,
+                            row.product,
+                            row.category,
+                            row.description
+                        ]);
+                        break;
+                    case 'packing':
+                        headers = ['Pickup Time', 'Total Quantity', 'Product', 'Category', 'Description'];
+                        data = parsedData.packing.map((row) => [
+                            row.pickupTime,
+                            row.quantity,
+                            row.product,
+                            row.category,
+                            row.description
+                        ]);
+                        break;
+                    case 'pickup':
+                        headers = ['Customer Name', 'Order ID', 'Pickup Time', 'Order Total', 'Paid', 'Payment Method'];
+                        data = parsedData.pickup.map((row) => [
+                            row.name,
+                            row.orderId,
+                            row.pickupTime,
+                            row.orderTotal,
+                            row.paid,
+                            row.paymentMethod
+                        ]);
+                        break;
+                }
+
+                const tsvContent = [headers, ...data].map((row) => row.join('\t')).join('\n');
+
+                navigator.clipboard
+                    .writeText(tsvContent)
+                    .then(() => {
+                        alert('Report copied to clipboard! You can now paste it into a spreadsheet.');
+                    })
+                    .catch((err) => {
+                        alert('Failed to copy to clipboard. Please try again.');
+                        console.error('Clipboard error:', err);
+                    });
+            }
+
+            initializeApp();
+        </script>
+    </body>
+</html>
