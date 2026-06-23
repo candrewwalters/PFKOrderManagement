@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>PFK Order Parser 3</title>
+        <title>PFK Order Parser 4</title>
         <style>
             * {
                 margin: 0;
@@ -200,6 +200,22 @@
                 color: #a5d6a7;
             }
 
+            .delete-row-btn {
+                background: none;
+                border: none;
+                cursor: pointer;
+                font-size: 16px;
+                padding: 2px 6px;
+                border-radius: 4px;
+                opacity: 0.75;
+                transition: all 0.2s ease;
+            }
+
+            .delete-row-btn:hover {
+                opacity: 1;
+                background: #3d2a2a;
+            }
+
             /* Master List click-to-edit cells */
             .report-table td[onclick] {
                 cursor: pointer;
@@ -354,7 +370,7 @@
     </head>
     <body>
         <div class="container">
-            <h1>🍽️ PFK Order Parser 3</h1>
+            <h1>🍽️ PFK Order Parser 4</h1>
 
             <div class="tabs">
                 <div class="tab active" onclick="switchTab(0)">Welcome</div>
@@ -369,7 +385,7 @@
 
             <div class="tab-content active" id="tab0">
                 <div class="welcome">
-                    <h2>Welcome to the PFK Order Parser 3</h2>
+                    <h2>Welcome to the PFK Order Parser 4</h2>
                     <p>
                         This application helps you process Squarespace order data and generate organized reports for
                         kitchen preparation.
@@ -402,8 +418,8 @@
                     <h2>Available Reports:</h2>
                     <ul>
                         <li>
-                            <strong>Master List:</strong> Complete order details with all fields and categories. Click
-                            Name, Pick Up Time, or Payment Method to edit.
+                            <strong>Master List:</strong> Complete order details with all fields and categories.
+                            Click Name, Pick Up Time, or Payment Method to edit.
                         </li>
                         <li>
                             <strong>Customer Order Tags:</strong> Orders organized by customer with full item details
@@ -497,9 +513,11 @@
             let paymentOverrides = {};
             let nameOverrides = {};
             let pickupTimeOverrides = {};
+            let deletedLineIds = new Set();
 
             // Manually-added rows (persist across re-renders)
             let manualRows = [];
+            let manualRowCounter = 0;
 
             const defaultCategories = `Alder Smoked Almonds,1 PAN
 Aprium Jam,1 PAN
@@ -713,6 +731,7 @@ Winter Minestrone,4 PER`;
                 }
 
                 const newRow = {
+                    lineId: 'manual-' + manualRowCounter++,
                     name: values['ent_name'],
                     orderId: values['ent_orderId'],
                     pickupTime: values['ent_pickupTime'],
@@ -751,9 +770,7 @@ Winter Minestrone,4 PER`;
             function regenerateAllReportsWithManualRows() {
                 // Rebuild parsedData.master by re-running from rawOrders + manualRows
                 const orders = parsedData.rawOrders || [];
-                generateMasterList(orders); // re-generates parsedData.master (imported rows)
-                // Now append manual rows and re-display
-                parsedData.master = [...parsedData.master, ...manualRows];
+                generateMasterList(orders); // re-generates parsedData.master (imported rows + manualRows)
                 displayMasterList();
 
                 // Rebuild other reports using the combined master list as a synthetic order set
@@ -910,6 +927,11 @@ Winter Minestrone,4 PER`;
 
             function updatePickupTime(orderId, newValue) {
                 pickupTimeOverrides[orderId] = newValue;
+                generateReports(parsedData.rawOrders);
+            }
+
+            function deleteRow(lineId) {
+                deletedLineIds.add(lineId);
                 generateReports(parsedData.rawOrders);
             }
 
@@ -1072,18 +1094,37 @@ Winter Minestrone,4 PER`;
                     paymentMethod: getPaymentMethod(order)
                 }));
 
+                // generateMasterList computes each item's lineId from its original position
+                // in resolvedOrders, so it gets the unfiltered list and skips deleted lines itself.
                 generateMasterList(resolvedOrders);
-                generateCustomerOrderTags(resolvedOrders);
-                generateProductionTotals(resolvedOrders);
-                generateProductionPackingList(resolvedOrders);
-                generatePickupDayList(resolvedOrders);
+
+                // The 4 derived reports don't track lineId — give them a copy with deleted
+                // lines already removed, using the same orderId+index lineId scheme. Orders
+                // with no items left (every line deleted) are dropped entirely so they don't
+                // show up as a ghost row in Pickup Day List and similar reports.
+                const ordersWithoutDeletedLines = resolvedOrders
+                    .map((order) => ({
+                        ...order,
+                        items: order.items.filter(
+                            (item, itemIndex) => !deletedLineIds.has('csv-' + order.orderId + '-' + itemIndex)
+                        )
+                    }))
+                    .filter((order) => order.items.length > 0);
+
+                generateCustomerOrderTags(ordersWithoutDeletedLines);
+                generateProductionTotals(ordersWithoutDeletedLines);
+                generateProductionPackingList(ordersWithoutDeletedLines);
+                generatePickupDayList(ordersWithoutDeletedLines);
             }
 
             function generateMasterList(orders) {
                 parsedData.master = [];
                 orders.forEach((order) => {
-                    order.items.forEach((item) => {
+                    order.items.forEach((item, itemIndex) => {
+                        const lineId = 'csv-' + order.orderId + '-' + itemIndex;
+                        if (deletedLineIds.has(lineId)) return; // skip deleted lines
                         parsedData.master.push({
+                            lineId,
                             name: order.name,
                             orderId: order.orderId,
                             pickupTime: order.pickupTime,
@@ -1102,6 +1143,9 @@ Winter Minestrone,4 PER`;
                 });
                 // Append any persisted manual rows when called from generateReports()
                 parsedData.master = [...parsedData.master, ...manualRows];
+                // Remove any manual rows the user has deleted (imported rows are already
+                // skipped above before they're ever added)
+                parsedData.master = parsedData.master.filter((row) => !deletedLineIds.has(row.lineId));
                 displayMasterList();
             }
 
@@ -1127,6 +1171,9 @@ Winter Minestrone,4 PER`;
                                 ${row.paymentMethod}
                             </button>
                         </td>
+                        <td>
+                            <button class="delete-row-btn" onclick="deleteRow('${row.lineId}')" title="Delete this line">🗑</button>
+                        </td>
                     </tr>
                 `
                     )
@@ -1149,6 +1196,7 @@ Winter Minestrone,4 PER`;
                             <th>Price</th>
                             <th>Description</th>
                             <th>Payment Method</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
